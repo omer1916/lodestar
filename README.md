@@ -5,6 +5,9 @@
 Gideceğin yerleri girersin; uygulama en kısa ziyaret sırasını hesaplar, rotayı gerçek yol
 ağı üzerinden çizer, canlı trafiği hesaba katar ve varış saatlerini verir.
 
+Kurye, nakliyeci ya da sadece birkaç şehir dolaşacak bir sürücü — hepsi kullanabilir.
+Uygulama açılışta hangisi olduğunu sorar ve ekranı ona göre sadeleştirir.
+
 **Canlı demo: https://omer1916.github.io/lodestar/**
 
 ---
@@ -34,10 +37,35 @@ kısıtları da hesaba katar.
 | **Kendi yolunu planlayan sürücü** | Gideceği yerlerin en kısa sırası, canlı trafik, varış saatleri, navigasyon |
 | **Şoför ve saha ekibi** | Sıralı durak listesi, navigasyon linkleri, teslimat işaretleme, konum paylaşımı |
 
-İlk açılışta **"iş için mi, kendim için mi"** diye sorar. Kişisel modda araç sayısı,
-kapasite, vardiya süresi, yük, müşteri telefonu, CSV/barkod girişi ve şoföre atama
-alanları hiç görünmez — gizlenen alanların değeri hesaba da katılmaz. Seçim
-localStorage'da saklanır, Kullanım satırından her an değiştirilebilir.
+### İki farklı ekran
+
+Hepsi aynı uygulamayı kullanır ama aynı ekrana ihtiyaçları yok. Kamyoncunun kapasite
+alanına ihtiyacı var, hafta sonu gezisi planlayan sürücünün yok. Uygulama ilk açılışta
+**"iş için mi, kendim için mi"** diye sorar ve ekranı ona göre kurar:
+
+| | İş modu | Kişisel mod |
+|---|:---:|:---:|
+| Durak girişi, haritadan seçme, sürükle-bırak sıralama | var | var |
+| En kısa sıra, gerçek yol rotası, canlı trafik | var | var |
+| Varış saatleri, yakıt maliyeti, CO₂ | var | var |
+| Zaman aralığı ("17:00'den önce orada ol") | var | var |
+| Adres defteri, rota geçmişi, paylaşım linki, navigasyon | var | var |
+| Araç sayısı ve araç kapasitesi | var | **yok** |
+| Vardiya süresi ve ertesi güne aktarma | var | **yok** |
+| Durak başına yük | var | **yok** |
+| Müşteri telefonu ve WhatsApp ETA mesajı | var | **yok** |
+| CSV ve barkod ile toplu durak girişi | var | **yok** |
+| Şoföre atama, teslimat takibi, teslimat kanıtı | var | **yok** |
+
+Zaman aralığı kişisel modda da duruyor: gezen sürücünün de "müze 17:00'de kapanıyor"
+demeye ihtiyacı var.
+
+İşin asıl kısmı alanları gizlemek değil, **hesaba katmamak**. Kişisel modda araç sayısı
+1'e, kapasite ve vardiya 0'a sabitlenir. Aksi halde iş modunda girilmiş bir "3 araç"
+değeri, alan görünmez olduğu halde özel bir geziyi üç araca bölerdi.
+
+Seçim tarayıcıda saklanır; planlama ekranındaki **Kullanım** satırından her an
+değiştirilebilir.
 
 ---
 
