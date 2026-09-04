@@ -297,17 +297,17 @@ function addStopRow(prefill){
       '<div class="badge drag" title="Sürükleyerek sırala">' + stops.length + '</div>' +
       '<div class="ac"><input class="inp addr" placeholder="Durak adresi (örn. Kadıköy, İstanbul)" autocomplete="off">' +
       '<div class="sug"></div></div>' +
-      '<button class="ico" data-detail title="Yük / zaman aralığı">' + RP.icons.svg('dots') + '</button>' +
+      '<button class="ico" data-detail title="' + stopDetailTitle() + '">' + RP.icons.svg('dots') + '</button>' +
       '<button class="ico" data-pick="' + id + '" title="Haritadan seç">' + RP.icons.svg('pin') + '</button>' +
       '<button class="ico dgr" data-del title="Sil">' + RP.icons.svg('trash') + '</button>' +
     '</div>' +
     '<div class="row detail" hidden style="margin-left:32px">' +
-      '<input class="inp numin load" type="number" min="0" step="1" placeholder="Yük" title="Yük (kg/koli)" style="width:72px">' +
+      '<input class="inp numin load work-only" type="number" min="0" step="1" placeholder="Yük" title="Yük (kg/koli)" style="width:72px">' +
       '<input class="inp numin wfrom" type="time" title="En erken" style="width:104px;text-align:left">' +
       '<input class="inp numin wto" type="time" title="En geç" style="width:104px;text-align:left">' +
     '</div>' +
     '<div class="row detail" hidden style="margin-left:32px">' +
-      '<input class="inp phone" type="tel" placeholder="Müşteri telefonu (WhatsApp için)" autocomplete="off">' +
+      '<input class="inp phone work-only" type="tel" placeholder="Müşteri telefonu (WhatsApp için)" autocomplete="off">' +
       '<button class="ico" data-fav title="Adres defterine kaydet">' + RP.icons.svg('star') + '</button>' +
     '</div>';
   stopsEl.appendChild(wrap);
@@ -734,6 +734,52 @@ var REQUIRE_AUTH = true;
   refresh();
 })();
 
+/* ---------- usage mode ---------- */
+/* Work mode is the courier / haulier planner. Personal mode is a driver planning
+   their own trip: the fleet, capacity, shift and delivery controls go away. Asked
+   once, then remembered; changeable any time from the Kullanım row. */
+(function(){
+  var modeGate = document.getElementById('modeGate');
+  var seg = document.getElementById('modeSeg');
+  if(!modeGate || !seg) return;
+
+  modeGate.querySelector('.logo').innerHTML = RP.icons.svg('star');
+
+  function syncSeg(){
+    var m = RP.mode.isPersonal() ? 'personal' : 'work';
+    seg.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('on', b.dataset.mode === m);
+    });
+  }
+
+  function ask(){
+    // never stack two dialogs: the sign-in gate has to clear first
+    var authGate = document.getElementById('authGate');
+    if(authGate && !authGate.hidden) return;
+    modeGate.hidden = RP.mode.get() !== null;
+    if(!modeGate.hidden) map.invalidateSize();
+  }
+
+  modeGate.querySelectorAll('.modepick button').forEach(function(b){
+    b.addEventListener('click', function(){
+      RP.mode.set(b.dataset.mode);
+      modeGate.hidden = true;
+      map.invalidateSize();
+    });
+  });
+
+  seg.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click', function(){ RP.mode.set(b.dataset.mode); });
+  });
+
+  RP.mode.onChange(function(){ syncSeg(); refreshStopDetailTitles(); });
+  syncSeg();
+
+  // the persisted session resolves a moment after load, same as the sign-in gate
+  if(RP.auth.available()) RP.auth.onChange(function(){ setTimeout(ask, 60); });
+  setTimeout(ask, 120);
+})();
+
 /* ---------- deferred (next-day) stops ---------- */
 function tomorrowStops(){
   try { return JSON.parse(localStorage.getItem('rp_tomorrow') || '[]'); }
@@ -941,19 +987,32 @@ btnRun.addEventListener('click', function(){
   });
 });
 
+function stopDetailTitle(){
+  return RP.mode.isPersonal() ? 'Zaman aralığı' : 'Yük / zaman aralığı';
+}
+
+function refreshStopDetailTitles(){
+  document.querySelectorAll('#stops [data-detail]').forEach(function(b){
+    b.title = stopDetailTitle();
+  });
+}
+
 function readOptions(){
   var metricBtn = document.querySelector('#metric button.on');
+  var solo = RP.mode.isPersonal();
   return {
     endMode: document.getElementById('endMode').value,
     metric: metricBtn ? metricBtn.dataset.m : 'distance',
-    vehicleCount: Math.min(6, Math.max(1, parseInt(document.getElementById('vehicleCount').value,10) || 1)),
-    capacity: Math.max(0, parseFloat(document.getElementById('capacity').value) || 0),
+    // personal mode hides these; reading them anyway would let a vehicle count left
+    // over from work mode silently split a private trip across imaginary vehicles
+    vehicleCount: solo ? 1 : Math.min(6, Math.max(1, parseInt(document.getElementById('vehicleCount').value,10) || 1)),
+    capacity: solo ? 0 : Math.max(0, parseFloat(document.getElementById('capacity').value) || 0),
     // 00:00 is a valid night-shift start; `|| 540` would turn it into 09:00
     startTime: (function(){
       var t = clockToMin(document.getElementById('startTime').value);
       return t == null ? 540 : t;
     })(),
-    shiftMinutes: Math.max(0, (parseFloat(document.getElementById('shiftHours').value) || 0) * 60)
+    shiftMinutes: solo ? 0 : Math.max(0, (parseFloat(document.getElementById('shiftHours').value) || 0) * 60)
   };
 }
 
@@ -1433,6 +1492,7 @@ function saveAndShare(){
       '<label class="lbl" style="margin-top:10px">Takip linki (müşteri/ekip)</label>' +
       '<div class="linkbox"><input class="inp" id="viewLink" readonly value="'+esc(viewUrl)+'">' +
       '<button class="ico" data-copy="viewLink" title="Kopyala">' + RP.icons.svg('clipboard') + '</button></div>' +
+      '<div class="work-only">' +
       '<label class="lbl" style="margin-top:10px">Şoför linki (konum paylaşır)</label>' +
       '<div class="linkbox"><input class="inp" id="drvLink" readonly value="'+esc(driverUrl)+'">' +
       '<button class="ico" data-copy="drvLink" title="Kopyala">' + RP.icons.svg('clipboard') + '</button></div>' +
@@ -1443,6 +1503,7 @@ function saveAndShare(){
         '<input class="inp" id="assignEmail" type="email" placeholder="surucu@ornek.com" autocomplete="off">' +
       '</div><button class="ico" id="assignBtn" title="Ata">' + RP.icons.svg('send') + '</button></div>' +
       '<p class="hint">Atanan şoför kendi hesabıyla girdiğinde bu rotayı "Rotalarım" altında görür.</p>' +
+      '</div>' +
       '<div id="progressBox"></div>';
 
     document.getElementById('assignBtn').addEventListener('click', function(){

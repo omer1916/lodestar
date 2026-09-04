@@ -362,7 +362,10 @@ body.landing{overflow:visible;height:auto;font-size:15px}
 .s3 h3{margin:0 0 8px;font-size:17px}
 .s3 p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
 
-.roles2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+/* four audience cards: 1 column on phones, a balanced 2x2 above — auto-fit would
+   leave a lone card stranded on its own row at three-column widths */
+.roles2{display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:760px){.roles2{grid-template-columns:1fr 1fr}}
 .rcard{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:26px}
 .rcard h3{margin:0 0 14px;font-size:18px}
 .rcard ul{margin:0 0 20px;padding-left:18px;color:var(--muted);font-size:14px;line-height:1.85}
@@ -609,3 +612,20 @@ html:not([data-theme="light"]) .docwarn{color:#fcd34d}
 .rrhead b{font-size:14px}
 .card.rr .btnrow .btn{width:auto;flex:1;text-decoration:none;
                       display:inline-flex;align-items:center;justify-content:center}
+
+/* ---- usage mode ----
+   Personal mode is a driver planning their own trip: fleet, capacity, shift and
+   delivery controls disappear. js/app.js also neutralises the hidden inputs when
+   reading options, so a value left over from work mode cannot leak into a result. */
+:root[data-mode="personal"] .work-only{display:none !important}
+
+/* first-run mode chooser; reuses the auth gate shell */
+.gate-card.modecard{max-width:470px}
+.modepick{display:flex;flex-direction:column;gap:10px;text-align:left}
+.modepick button{width:100%;cursor:pointer;font:inherit;color:var(--text);text-align:left;
+                 background:var(--panel2);border:1px solid var(--line);
+                 border-radius:var(--r);padding:14px 16px}
+.modepick button:hover,.modepick button:focus-visible{border-color:var(--accent)}
+.modepick b{display:flex;align-items:center;gap:9px;font-size:15px}
+.modepick b .ic{width:17px;height:17px;flex:none;color:var(--accent)}
+.modepick small{display:block;color:var(--muted);font-size:12.5px;line-height:1.55;margin-top:6px}

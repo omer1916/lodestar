@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
 <title>Lodestar — Planlama</title>
-<meta name="description" content="Kargo ve kurye teslimatları için çok duraklı rota optimizasyonu: kapasite, zaman penceresi, canlı trafik ve gerçek zamanlı şoför takibi.">
+<meta name="description" content="Çok duraklı rota optimizasyonu: gerçek yol ağı, canlı trafik, zaman penceresi ve yakıt maliyeti. Kurye, nakliye ve şehirler arası yolculuk için.">
 <meta name="theme-color" content="#3b82f6">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="icon" href="favicon.svg?v=1" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/style.css?v=36">
+<link rel="stylesheet" href="css/style.css?v=38">
 </head>
 <body>
 
@@ -31,12 +31,33 @@
   </div>
 </div>
 
+<!-- asked once on first use; the answer lives in localStorage, changeable later from the Kullanım row -->
+<div class="gate" id="modeGate" hidden>
+  <div class="gate-card modecard">
+    <div class="logo lg" aria-hidden="true"></div>
+    <h1>Nasıl kullanacaksın?</h1>
+    <p>Sana gerekmeyen alanları hiç göstermeyelim. Bu seçimi sonradan Kullanım satırından değiştirebilirsin.</p>
+    <div class="modepick">
+      <button type="button" data-mode="work">
+        <b><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 4h10v8H1z"/><path d="M11 7h3l1.5 2.5V12H11z"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg> İş için</b>
+        <small>Kargo, kurye, nakliye. Çoklu araç ve kapasite, vardiya süresi, şoföre atama,
+        CSV ve barkodla toplu durak girişi, teslimat takibi.</small>
+      </button>
+      <button type="button" data-mode="personal">
+        <b><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 14.5s5-4.7 5-8a5 5 0 0 0-10 0c0 3.3 5 8 5 8z"/><circle cx="8" cy="6.4" r="1.9"/></svg> Kendim için</b>
+        <small>Gideceğin yerleri yaz, en kısa sırayı al. Gerçek yol rotası, canlı trafik,
+        varış saatleri, yakıt maliyeti ve navigasyon — fazlası olmadan.</small>
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="app">
   <aside class="panel">
     <header>
       <div class="htxt">
         <h1><span class="logo"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1.8 10 6l4.4.6-3.2 3.1.8 4.4L8 12l-4 2.1.8-4.4L1.6 6.6 6 6z"/></svg></span> Lodestar</h1>
-        <p>Durakları gir; kapasite, zaman penceresi ve canlı trafiği hesaba katarak en kısa rotayı çizsin.</p>
+        <p>Durakları gir; gerçek yol ağı, canlı trafik ve zaman kısıtlarına göre en kısa sırayı hesaplasın.</p>
       </div>
       <div class="hactions">
         <div id="authSlot"></div>
@@ -63,9 +84,9 @@
         <div id="stops"></div>
         <button class="btn" id="addStop">+ Durak ekle</button>
         <div class="btnrow" style="margin-top:8px">
-          <button class="btn ghost" id="csvBtn"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M9 1.5H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5.5z"/><path d="M9 1.5v4h4"/><path d="M5.5 8.5h5M5.5 11h5"/></svg>CSV yükle</button>
+          <button class="btn ghost work-only" id="csvBtn"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M9 1.5H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5.5z"/><path d="M9 1.5v4h4"/><path d="M5.5 8.5h5M5.5 11h5"/></svg>CSV yükle</button>
           <button class="btn ghost" id="photoBtn"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.5 5h3l1-1.7h5L11.5 5h3v8.5h-13z"/><circle cx="8" cy="8.9" r="2.8"/></svg>Fotoğraftan</button>
-          <button class="btn ghost" id="scanBtn"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.5 2.5v11M4 2.5v11M6.5 2.5v7M9 2.5v11M11.5 2.5v7M14 2.5v11"/></svg>Barkod</button>
+          <button class="btn ghost work-only" id="scanBtn"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.5 2.5v11M4 2.5v11M6.5 2.5v7M9 2.5v11M11.5 2.5v7M14 2.5v11"/></svg>Barkod</button>
         </div>
         <input type="file" id="csvFile" accept=".csv,.txt,text/csv,text/plain" hidden>
         <input type="file" id="photoFile" accept="image/*" hidden>
@@ -86,6 +107,13 @@
 
       <div class="opts">
         <div class="opt">
+          <span>Kullanım</span>
+          <div class="seg" id="modeSeg">
+            <button data-mode="work">İş</button>
+            <button data-mode="personal">Kendim</button>
+          </div>
+        </div>
+        <div class="opt">
           <span>Rota bitişi</span>
           <select class="inp" id="endMode">
             <option value="last">Son durakta bitsin</option>
@@ -100,15 +128,15 @@
             <button data-m="duration">Süre</button>
           </div>
         </div>
-        <div class="opt">
+        <div class="opt work-only">
           <span>Araç sayısı</span>
           <input class="inp numin" id="vehicleCount" type="number" min="1" max="6" value="1">
         </div>
-        <div class="opt">
+        <div class="opt work-only">
           <span>Araç kapasitesi</span>
           <input class="inp numin" id="capacity" type="number" min="0" step="1" value="0" placeholder="0 = sınırsız">
         </div>
-        <div class="opt">
+        <div class="opt work-only">
           <span>Vardiya süresi (saat)</span>
           <input class="inp numin" id="shiftHours" type="number" min="0" max="24" step="0.5" value="0" placeholder="0 = sınırsız">
         </div>
@@ -185,19 +213,20 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="js/icons.js?v=36"></script>
-<script src="js/geo.js?v=36"></script>
-<script src="js/optimize.js?v=36"></script>
-<script src="js/routing.js?v=36"></script>
-<script src="js/firebase-config.js?v=36"></script>
-<script src="js/storage.js?v=36"></script>
-<script src="js/auth.js?v=36"></script>
-<script src="js/auth-ui.js?v=36"></script>
-<script src="js/delivery.js?v=36"></script>
-<script src="js/importers.js?v=36"></script>
-<script src="js/ocr.js?v=36"></script>
-<script src="js/scanner.js?v=36"></script>
-<script src="js/pdf.js?v=36"></script>
-<script src="js/app.js?v=36"></script>
+<script src="js/icons.js?v=38"></script>
+<script src="js/mode.js?v=38"></script>
+<script src="js/geo.js?v=38"></script>
+<script src="js/optimize.js?v=38"></script>
+<script src="js/routing.js?v=38"></script>
+<script src="js/firebase-config.js?v=38"></script>
+<script src="js/storage.js?v=38"></script>
+<script src="js/auth.js?v=38"></script>
+<script src="js/auth-ui.js?v=38"></script>
+<script src="js/delivery.js?v=38"></script>
+<script src="js/importers.js?v=38"></script>
+<script src="js/ocr.js?v=38"></script>
+<script src="js/scanner.js?v=38"></script>
+<script src="js/pdf.js?v=38"></script>
+<script src="js/app.js?v=38"></script>
 </body>
 </html>

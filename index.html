@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Lodestar — Kargo ve Kurye Rota Optimizasyonu</title>
-<meta name="description" content="Teslimat duraklarını gir, Lodestar en kısa rotayı çizsin. Çoklu araç, kapasite, zaman penceresi, canlı trafik, şoför takibi ve teslimat kanıtı — tarayıcıda, ücretsiz.">
+<title>Lodestar — Çok Duraklı Rota Optimizasyonu</title>
+<meta name="description" content="Gideceğin yerleri gir, Lodestar en kısa sırayı hesaplasın. Kurye, nakliye ve şehirler arası yolculuk için: gerçek yol ağı, canlı trafik, zaman penceresi, yakıt maliyeti ve navigasyon.">
 <meta name="theme-color" content="#3b82f6">
-<meta property="og:title" content="Lodestar — Kargo ve Kurye Rota Optimizasyonu">
+<meta property="og:title" content="Lodestar — Çok Duraklı Rota Optimizasyonu">
 <meta property="og:description" content="Çok duraklı teslimat rotalarını canlı trafiğe göre optimize et, şoförüne ata, teslimatları anlık takip et.">
 <meta property="og:type" content="website">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.svg?v=1" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/style.css?v=36">
+<link rel="stylesheet" href="css/style.css?v=38">
 </head>
 <body class="plain landing">
 
@@ -35,20 +35,20 @@
   <section class="hero">
     <div class="hero-text">
       <span class="badge-pill">Ücretsiz · Kurulum gerektirmez</span>
-      <h1>Teslimat rotanı <span class="grad">saniyeler içinde</span> planla.</h1>
+      <h1>Çok duraklı rotanı <span class="grad">saniyeler içinde</span> planla.</h1>
       <p class="lead">
-        Durakları yaz, fotoğraftan ya da CSV'den yükle. Lodestar en kısa sırayı hesaplar,
-        gerçek yol ağı üzerinden çizer, canlı trafiği hesaba katar; şoförüne atar ve
-        teslimatları anlık takip edersin.
+        Gideceğin yerleri yaz; Lodestar en kısa sırayı hesaplar, gerçek yol ağı üzerinden
+        çizer ve canlı trafiği hesaba katar. Kuryeden şehirler arası nakliyeye, hafta sonu
+        gezisinden saha ekibine kadar hepsi aynı soruyu soruyor: hangi sırayla gitmeliyim?
       </p>
       <div class="hero-cta">
         <a class="btn primary" href="app.html">Ücretsiz başla</a>
         <a class="btn ghost" href="#how">Nasıl çalışır?</a>
       </div>
       <ul class="hero-points">
-        <li>Hesap açmadan da kullanılabilir</li>
-        <li>Kredi kartı istemez</li>
-        <li>Telefonda da çalışır</li>
+        <li>Ücretsiz, kredi kartı istemez</li>
+        <li>Telefona kurulabilir, çevrimdışı açılır</li>
+        <li>Şoför linkini açan için hesap gerekmez</li>
       </ul>
     </div>
 
@@ -86,8 +86,8 @@
   </section>
 
   <section id="features" class="lsec">
-    <h2>Gerçek teslimat işine göre tasarlandı</h2>
-    <p class="lsec-sub">Sadece "en kısa yol" değil; kapasite, zaman ve saha gerçekleri.</p>
+    <h2>Gerçek yol şartlarına göre tasarlandı</h2>
+    <p class="lsec-sub">Kuş uçuşu değil gerçek yollar; üstüne canlı trafik, zaman kısıtları ve maliyet.</p>
     <div class="fgrid">
       <article class="fcard">
         <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.2"/><path d="M10.6 5.4 9.2 9.2 5.4 10.6 6.8 6.8z"/></svg></div>
@@ -138,38 +138,61 @@
       <div class="s3">
         <div class="s3n">1</div>
         <h3>Durakları gir</h3>
-        <p>Adres yaz, haritadan tıkla, CSV yükle ya da listenin fotoğrafını çek. Başlangıç noktası konumundan otomatik gelir.</p>
+        <p>Adres yaz, haritadan tıkla, listenin fotoğrafını çek ya da CSV yükle. Başlangıç noktası konumundan otomatik gelir.</p>
       </div>
       <div class="s3">
         <div class="s3n">2</div>
         <h3>Optimize et</h3>
-        <p>Araç sayısı, kapasite ve çıkış saatini seç. Rota gerçek yol ağı ve canlı trafiğe göre saniyeler içinde çizilir.</p>
+        <p>Çıkış saatini seç; iş için kullanıyorsan araç sayısı ve kapasiteyi de. Rota gerçek yol ağı ve canlı trafiğe göre saniyeler içinde çizilir.</p>
       </div>
       <div class="s3">
         <div class="s3n">3</div>
-        <h3>Şoföre gönder</h3>
-        <p>Linki paylaş ya da şoförüne ata. Şoför navigasyonu açar, teslimatı işaretler; sen anlık takip edersin.</p>
+        <h3>Yola çık</h3>
+        <p>Her durakta tek dokunuşla navigasyon. İş için kullanıyorsan rotayı şoförüne atarsın; teslimatları anlık takip edersin.</p>
       </div>
     </div>
   </section>
 
   <section id="roles" class="lsec">
     <h2>Kimler için</h2>
+    <p class="lsec-sub">Duraklar farklı, soru aynı: hangi sırayla gitmeliyim?</p>
     <div class="roles2">
       <article class="rcard">
         <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 3H4a1 1 0 0 0-1 1v9.5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-1.5"/><path d="M5.5 1.8h5v2.4h-5z"/></svg></div>
-        <h3>Planlayıcı / işletme</h3>
+        <h3>Kargo ve kurye</h3>
         <ul>
           <li>Günlük teslimat listesini tek ekranda planla</li>
           <li>Araçlara kapasiteye göre otomatik dağıt</li>
-          <li>Rota geçmişini sakla, tekrar kullan</li>
+          <li>"09:00-11:00 arası" gibi teslim saatlerini kolla</li>
           <li>Teslimat durumunu canlı izle</li>
         </ul>
         <a class="btn ghost" href="app.html">Planlamaya başla</a>
       </article>
       <article class="rcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1.6 14 5v6l-6 3.4L2 11V5z"/><path d="M2 5l6 3.4L14 5"/><path d="M8 8.4v6"/></svg></div>
+        <h3>Nakliye ve kamyon</h3>
+        <ul>
+          <li>Şehirler arası yükleme-boşaltma turunu sırala</li>
+          <li>Durak başına yük gir, kapasiteyi aşma</li>
+          <li>Yakıt gideri ve toplam süreyi baştan gör</li>
+          <li>Vardiyaya sığmayan durakları ertesi güne aktar</li>
+        </ul>
+        <a class="btn ghost" href="app.html">Planlamaya başla</a>
+      </article>
+      <article class="rcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.8 3.6 6 2v10.4l-4.2 1.6z"/><path d="M6 2l4 1.6v10.4L6 12.4z"/><path d="M10 3.6l4.2-1.6v10.4L10 14z"/></svg></div>
+        <h3>Kendi yolunu planlayan sürücü</h3>
+        <ul>
+          <li>Gideceğin yerleri yaz, en kısa sırayı al</li>
+          <li>Kişisel modda yük ve filo alanları hiç görünmez</li>
+          <li>Canlı trafik, varış saatleri, yakıt maliyeti</li>
+          <li>Her durakta tek dokunuşla navigasyon</li>
+        </ul>
+        <a class="btn ghost" href="app.html">Rotanı planla</a>
+      </article>
+      <article class="rcard">
         <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 4h10v8H1z"/><path d="M11 7h3l1.5 2.5V12H11z"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg></div>
-        <h3>Şoför / kurye</h3>
+        <h3>Şoför ve saha ekibi</h3>
         <ul>
           <li>Sıralı durak listesi ve sıradaki adres</li>
           <li>Tek dokunuşla Google Maps veya Yandex Navigasyon</li>
@@ -212,11 +235,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="js/icons.js?v=36"></script>
-<script src="js/firebase-config.js?v=36"></script>
-<script src="js/storage.js?v=36"></script>
-<script src="js/auth.js?v=36"></script>
-<script src="js/auth-ui.js?v=36"></script>
+<script src="js/icons.js?v=38"></script>
+<script src="js/firebase-config.js?v=38"></script>
+<script src="js/storage.js?v=38"></script>
+<script src="js/auth.js?v=38"></script>
+<script src="js/auth-ui.js?v=38"></script>
 <script>
 (function(){
   "use strict";

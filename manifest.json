@@ -1,7 +1,7 @@
 {
-  "name": "Lodestar — Kargo Rota Optimizasyonu",
+  "name": "Lodestar — Çok Duraklı Rota Optimizasyonu",
   "short_name": "Lodestar",
-  "description": "Çok duraklı teslimat rotası optimizasyonu: kapasite, zaman penceresi, canlı trafik, şoför takibi ve teslimat kanıtı.",
+  "description": "Çok duraklı rota optimizasyonu: gerçek yol ağı, canlı trafik, zaman penceresi ve yakıt maliyeti. Kurye, nakliye ve şehirler arası yolculuk için.",
   "start_url": "app.html",
   "scope": "./",
   "display": "standalone",

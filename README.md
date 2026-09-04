@@ -1,11 +1,9 @@
 # Lodestar
 
-**Kargo ve kurye teslimatları için çok duraklı rota optimizasyonu.** Tarayıcıda çalışır,
-kurulum istemez.
+**Çok duraklı rota optimizasyonu.** Tarayıcıda çalışır, kurulum istemez.
 
-Durakları girersin; uygulama en kısa ziyaret sırasını hesaplar, rotayı gerçek yol ağı
-üzerinden çizer, canlı trafiği hesaba katar, şoförüne atar ve teslimatları anlık takip
-etmeni sağlar.
+Gideceğin yerleri girersin; uygulama en kısa ziyaret sırasını hesaplar, rotayı gerçek yol
+ağı üzerinden çizer, canlı trafiği hesaba katar ve varış saatlerini verir.
 
 **Canlı demo: https://omer1916.github.io/lodestar/**
 
@@ -13,14 +11,33 @@ etmeni sağlar.
 
 ## Ne işe yarar
 
-Günde 15 adrese teslimat yapan bir kurye, adresleri elle sıraladığında tipik olarak
-%20-30 fazla yol yapar. Lodestar bu sıralamayı hesaplar ve farkı gösterir:
+"Şu noktalara gideceğim, hangi sırayla gitmeliyim?" sorusu göründüğünden pahalı. Elle
+sıralanan rotalarda ölçtüğüm fark %20-31 arasında değişti. Lodestar sıralamayı
+hesaplar ve farkı ekranda gösterir:
 
 > Optimize sıralama **%31 daha kısa** — girilen sırayla 9,4 km fazla yol yapılacaktı.
 > ~2,8 L · ~128 ₺ yakıt · ~7,6 kg CO₂
 
+Ölçek fark etmiyor. Şehir içi 15 duraklı bir kurye turu da, İstanbul çıkışlı
+Bursa-İzmir-Antalya-Konya-Ankara turu da aynı problem: ikincisinde elle sıralama
+**425 km fazla yol**, yaklaşık 1.800 ₺ fazladan yakıt demek.
+
 Sadece "en kısa yol" değil; kapasite, teslim saatleri ve vardiya süresi gibi gerçek
 kısıtları da hesaba katar.
+
+### Kimin işine yarar
+
+| | |
+|---|---|
+| **Kargo ve kurye** | Günlük teslimat listesi, çoklu araç dağıtımı, teslim saatleri, teslimat takibi |
+| **Nakliye ve kamyon** | Şehirler arası yükleme-boşaltma turu, durak başına yük, kapasite, yakıt gideri |
+| **Kendi yolunu planlayan sürücü** | Gideceği yerlerin en kısa sırası, canlı trafik, varış saatleri, navigasyon |
+| **Şoför ve saha ekibi** | Sıralı durak listesi, navigasyon linkleri, teslimat işaretleme, konum paylaşımı |
+
+İlk açılışta **"iş için mi, kendim için mi"** diye sorar. Kişisel modda araç sayısı,
+kapasite, vardiya süresi, yük, müşteri telefonu, CSV/barkod girişi ve şoföre atama
+alanları hiç görünmez — gizlenen alanların değeri hesaba da katılmaz. Seçim
+localStorage'da saklanır, Kullanım satırından her an değiştirilebilir.
 
 ---
 
@@ -86,6 +103,8 @@ Yedek tetikleyici anlık hıza değil **5 dakikada kat edilen yola** bakar — b
 
 ### Arayüz
 - Tanıtım sayfası + planlama uygulaması + şoför ekranı + takip + özet
+- **İş / kişisel mod** — kişisel modda filo ve teslimat alanları hem gizlenir hem de
+  hesaba katılmaz
 - Açık/koyu tema, tamamen mobil uyumlu
 - **PWA** — telefona kurulabilir, çevrimdışı açılır
 - Emoji yerine satır içi SVG ikonlar (her platformda aynı görünür)
@@ -155,6 +174,7 @@ lodestar/
 ├── js/
 │   ├── firebase-config.js # Firebase projesi (gizli değil)
 │   ├── icons.js           # satır içi SVG ikon seti
+│   ├── mode.js            # iş / kişisel kullanım modu
 │   ├── geo.js             # geocoding, reverse geocoding, haversine
 │   ├── optimize.js        # nearest-neighbor, 2-opt, tavlama, sweep, zaman penceresi
 │   ├── routing.js         # OSRM + TomTom rota, trafik bölümleri, mesafe matrisi
