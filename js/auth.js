@@ -122,8 +122,10 @@ RP.auth = (function(){
       name: extra.name || u.displayName || (u.email || '').split('@')[0] || 'Kullanıcı',
       email: u.email || '',
       role: extra.role || 'planner',
-      // 'work' or 'personal': decides which planner fields the account ever sees
-      usage: extra.usage === 'personal' ? 'personal' : 'work',
+      /* 'work' or 'personal': decides which planner fields the account ever sees.
+         Left null when nobody was asked (Google sign-in), so the planner still puts
+         the question rather than silently assuming a business account. */
+      usage: (extra.usage === 'personal' || extra.usage === 'work') ? extra.usage : null,
       company: extra.company || '',
       photoURL: u.photoURL || '',
       createdAt: Date.now()
