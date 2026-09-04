@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.svg?v=1" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/style.css?v=45">
+<link rel="stylesheet" href="css/style.css?v=46">
 </head>
 <body class="plain landing">
 
@@ -208,10 +208,11 @@
 
   <section class="lcta">
     <h2>Bugünün rotasını şimdi planla</h2>
-    <p>Kayıt ücretsiz, kredi kartı istemez. Rotaların hesabına kaydedilir; telefondan da
-      bilgisayardan da aynı listeye ulaşırsın.</p>
+    <p id="ctaText">Kayıt ücretsiz, kredi kartı istemez. Rotaların hesabına kaydedilir;
+      telefondan da bilgisayardan da aynı listeye ulaşırsın.</p>
     <div class="hero-cta">
       <button class="btn primary" id="signupBtn">Hesap oluştur</button>
+      <a class="btn primary" id="ctaOpen" href="app.html" hidden>Planlamaya devam et</a>
       <a class="btn ghost" href="kurulum.html">Nasıl çalışır?</a>
     </div>
   </section>
@@ -237,11 +238,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="js/icons.js?v=45"></script>
-<script src="js/firebase-config.js?v=45"></script>
-<script src="js/storage.js?v=45"></script>
-<script src="js/auth.js?v=45"></script>
-<script src="js/auth-ui.js?v=45"></script>
+<script src="js/icons.js?v=46"></script>
+<script src="js/firebase-config.js?v=46"></script>
+<script src="js/storage.js?v=46"></script>
+<script src="js/auth.js?v=46"></script>
+<script src="js/auth-ui.js?v=46"></script>
 <script>
 (function(){
   "use strict";
@@ -283,11 +284,22 @@
      signed out it lands on the sign-in gate the neighbouring button already opens.
      With no Firebase at all it stays visible so nothing is unreachable. */
   var openApp = document.getElementById('openApp');
-  if(RP.auth.available()){
-    RP.auth.onChange(function(user){ openApp.hidden = !user; });
-  } else {
-    openApp.hidden = false;
+  var ctaOpen = document.getElementById('ctaOpen');
+  var ctaText = document.getElementById('ctaText');
+  var signup = document.getElementById('signupBtn');
+
+  // the closing pitch is written for a visitor; someone signed in is past it
+  function forSession(user){
+    openApp.hidden = !user;
+    ctaOpen.hidden = !user;
+    signup.hidden = !!user;
+    ctaText.textContent = user
+      ? 'Rotaların hesabına kayıtlı. Kaldığın yerden devam et; telefondan da bilgisayardan da aynı liste.'
+      : 'Kayıt ücretsiz, kredi kartı istemez. Rotaların hesabına kaydedilir; telefondan da bilgisayardan da aynı listeye ulaşırsın.';
   }
+
+  if(RP.auth.available()) RP.auth.onChange(forSession);
+  else forSession(null);
 
   /* Someone who registers here as a driver wants their assigned routes, not the
      planner. The profile lands after the session, so this runs again once it does;
