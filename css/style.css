@@ -629,3 +629,7 @@ html:not([data-theme="light"]) .docwarn{color:#fcd34d}
 .modepick b{display:flex;align-items:center;gap:9px;font-size:15px}
 .modepick b .ic{width:17px;height:17px;flex:none;color:var(--accent)}
 .modepick small{display:block;color:var(--muted);font-size:12.5px;line-height:1.55;margin-top:6px}
+
+/* driver landing on the planner: their own screen is one tap away */
+.card.drvhint{border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.08)}
+.card.drvhint .btn{width:auto;padding:9px 18px;text-decoration:none;display:inline-block}

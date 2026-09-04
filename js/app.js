@@ -734,6 +734,35 @@ var REQUIRE_AUTH = true;
   refresh();
 })();
 
+/* ---------- driver accounts ---------- */
+/* Registering as a driver used to change nothing but a label in the header: the
+   planner opened as usual and no link led to the driver's own screen. */
+function isDriver(){
+  var p = RP.auth.available() ? RP.auth.profile() : null;
+  return !!(p && p.role === 'driver');
+}
+
+(function(){
+  var hint = document.getElementById('driverHint');
+  if(!hint || !RP.auth.available()) return;
+
+  var SENT = 'rp_drv_sent';
+  function alreadySent(){
+    try { return sessionStorage.getItem(SENT) === '1'; } catch(e){ return false; }
+  }
+
+  // the profile arrives after the session does, so this runs again once it lands
+  RP.auth.onChange(function(){
+    var drv = isDriver();
+    hint.hidden = !drv;
+    // send them to their screen once per session; coming back here keeps them here
+    if(drv && !alreadySent()){
+      try { sessionStorage.setItem(SENT, '1'); } catch(e){}
+      location.href = 'driver.html';
+    }
+  });
+})();
+
 /* ---------- usage mode ---------- */
 /* Work mode is the courier / haulier planner. Personal mode is a driver planning
    their own trip: the fleet, capacity, shift and delivery controls go away. Asked
@@ -756,6 +785,12 @@ var REQUIRE_AUTH = true;
     // never stack two dialogs: the sign-in gate has to clear first
     var authGate = document.getElementById('authGate');
     if(authGate && !authGate.hidden) return;
+    // a driver does not plan their own trips here, so the question has no meaning
+    if(isDriver()){ RP.mode.set('work'); modeGate.hidden = true; return; }
+    // accounts registered after the usage step already carry the answer, so the
+    // dialog is only for older accounts and anyone who never chose
+    var prof = RP.auth.available() ? RP.auth.profile() : null;
+    if(prof && prof.usage && RP.mode.get() === null) RP.mode.set(prof.usage);
     modeGate.hidden = RP.mode.get() !== null;
     if(!modeGate.hidden) map.invalidateSize();
   }

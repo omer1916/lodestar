@@ -43,6 +43,14 @@ RP.authUI = (function(){
             '<label class="lbl">Şifre</label>' +
             '<input class="inp" data-el="password" type="password" autocomplete="current-password" placeholder="En az 6 karakter" required>' +
           '</div>' +
+          '<div class="field" data-el="usageField" hidden>' +
+            '<label class="lbl">Kullanım</label>' +
+            '<div class="seg wide" data-el="usage">' +
+              '<button type="button" data-u="work" class="on">İş</button>' +
+              '<button type="button" data-u="personal">Kişisel</button>' +
+            '</div>' +
+            '<p class="hint" data-el="usageHint">Kargo, kurye, nakliye. Çoklu araç, kapasite, teslimat takibi.</p>' +
+          '</div>' +
           '<div class="field" data-el="roleField" hidden>' +
             '<label class="lbl">Hesap türü</label>' +
             '<div class="seg wide" data-el="role">' +
@@ -72,6 +80,19 @@ RP.authUI = (function(){
     el('close').addEventListener('click', close);
     document.addEventListener('keydown', function(e){
       if(e.key === 'Escape' && modal && !modal.hidden) close();
+    });
+
+    el('usage').addEventListener('click', function(e){
+      var b = e.target.closest('button[data-u]');
+      if(!b) return;
+      this.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      var work = b.dataset.u === 'work';
+      el('usageHint').textContent = work
+        ? 'Kargo, kurye, nakliye. Çoklu araç, kapasite, teslimat takibi.'
+        : 'Gideceğin yerleri planla. Filo ve teslimat alanları hiç görünmez.';
+      // asking "planner or driver?" makes no sense for someone planning their own trip
+      el('roleField').hidden = !work;
     });
 
     el('role').addEventListener('click', function(e){
@@ -118,7 +139,9 @@ RP.authUI = (function(){
       ? 'E-posta adresine sıfırlama bağlantısı gönderelim.'
       : 'Rotalarını kaydet, şoförüne ata ve teslimatları takip et.';
     el('nameField').hidden = !isRegister;
-    el('roleField').hidden = !isRegister;
+    el('usageField').hidden = !isRegister;
+    // the planner/driver split only means something inside a business
+    el('roleField').hidden = !isRegister || currentUsage() !== 'work';
     el('passField').hidden = isReset;
     el('google').hidden = !showGoogle;
     el('divider').hidden = !showGoogle;
@@ -179,11 +202,18 @@ RP.authUI = (function(){
 
     if(mode === 'register'){
       if(!name){ message('Ad soyad gerekli.', 'err'); return; }
-      var role = el('role').querySelector('button.on').dataset.r;
-      run(btn, RP.auth.signUpEmail(name, email, pass, role));
+      var usage = currentUsage();
+      var role = usage === 'work' ? el('role').querySelector('button.on').dataset.r : 'planner';
+      run(btn, RP.auth.signUpEmail(name, email, pass, role, usage));
     } else {
       run(btn, RP.auth.signInEmail(email, pass));
     }
+  }
+
+  function currentUsage(){
+    var seg = el('usage');
+    var b = seg && seg.querySelector('button.on');
+    return b ? b.dataset.u : 'work';
   }
 
   function open(startMode, onDone){

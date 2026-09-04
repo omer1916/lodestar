@@ -122,6 +122,8 @@ RP.auth = (function(){
       name: extra.name || u.displayName || (u.email || '').split('@')[0] || 'Kullanıcı',
       email: u.email || '',
       role: extra.role || 'planner',
+      // 'work' or 'personal': decides which planner fields the account ever sees
+      usage: extra.usage === 'personal' ? 'personal' : 'work',
       company: extra.company || '',
       photoURL: u.photoURL || '',
       createdAt: Date.now()
@@ -181,8 +183,8 @@ RP.auth = (function(){
     });
   }
 
-  function signUpEmail(name, email, password, role){
-    pendingSignup = { name: name, role: role };
+  function signUpEmail(name, email, password, role, usage){
+    pendingSignup = { name: name, role: role, usage: usage };
     return requireReady().then(function(){
       var auth = firebase.auth();
       var anon = auth.currentUser;
@@ -203,7 +205,7 @@ RP.auth = (function(){
     }).then(function(cred){
       var u = cred.user;
       return u.updateProfile({ displayName: name }).catch(function(){}).then(function(){
-        return createProfile(u, { name: name, role: role });
+        return createProfile(u, { name: name, role: role, usage: usage });
       });
     }).then(function(doc){
       pendingSignup = null;

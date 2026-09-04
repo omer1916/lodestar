@@ -9,3 +9,4 @@ __*.txt
 Thumbs.db
 desktop.ini
 .DS_Store
+.claude/
