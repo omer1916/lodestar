@@ -7,7 +7,7 @@ Durakları girersin; uygulama en kısa ziyaret sırasını hesaplar, rotayı ger
 üzerinden çizer, canlı trafiği hesaba katar, şoförüne atar ve teslimatları anlık takip
 etmeni sağlar.
 
-> **Canlı demo:** _(yayına aldıktan sonra link buraya)_
+**Canlı demo: https://omer1916.github.io/rotaplan/**
 
 ---
 
