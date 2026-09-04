@@ -40,8 +40,10 @@ kısıtları da hesaba katar.
 ### İki farklı ekran
 
 Hepsi aynı uygulamayı kullanır ama aynı ekrana ihtiyaçları yok. Kamyoncunun kapasite
-alanına ihtiyacı var, hafta sonu gezisi planlayan sürücünün yok. Uygulama ilk açılışta
-**"iş için mi, kendim için mi"** diye sorar ve ekranı ona göre kurar:
+alanına ihtiyacı var, hafta sonu gezisi planlayan sürücünün yok. Kayıt sırasında önce
+**İş mi Kişisel mi** diye sorulur; iş seçilirse ayrıca **Planlayıcı mı Şoför mü**
+belirtilir. Kişisel kullanıcıya planlayıcı/şoför sorusu hiç sorulmaz — kendi gezisini
+planlayan biri için anlamı yok. Ekran buna göre kurulur:
 
 | | İş modu | Kişisel mod |
 |---|:---:|:---:|
@@ -64,8 +66,9 @@ demeye ihtiyacı var.
 1'e, kapasite ve vardiya 0'a sabitlenir. Aksi halde iş modunda girilmiş bir "3 araç"
 değeri, alan görünmez olduğu halde özel bir geziyi üç araca bölerdi.
 
-Seçim tarayıcıda saklanır; planlama ekranındaki **Kullanım** satırından her an
-değiştirilebilir.
+Seçim hesaba yazılır ve planlama ekranındaki **Kullanım** satırından her an
+değiştirilebilir. Şoför hesabıyla girene planlama yerine kendi **Rotalarım** ekranı
+açılır; iki ekran birbirine linkli, hiçbiri çıkmaz sokak değil.
 
 ---
 
