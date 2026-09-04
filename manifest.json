@@ -1,6 +1,6 @@
 {
-  "name": "RotaPlan — Kargo Rota Optimizasyonu",
-  "short_name": "RotaPlan",
+  "name": "Lodestar — Kargo Rota Optimizasyonu",
+  "short_name": "Lodestar",
   "description": "Çok duraklı teslimat rotası optimizasyonu: kapasite, zaman penceresi, canlı trafik, şoför takibi ve teslimat kanıtı.",
   "start_url": "app.html",
   "scope": "./",

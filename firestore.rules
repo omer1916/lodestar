@@ -1,7 +1,7 @@
 rules_version = '2';
 
 /*
-  RotaPlan — Firestore güvenlik kuralları
+  Lodestar — Firestore güvenlik kuralları
   Firebase konsolu → Firestore Database → Rules bölümüne yapıştırıp "Publish" deyin.
 
   Erişim modeli

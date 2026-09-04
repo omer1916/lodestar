@@ -1,4 +1,4 @@
-# RotaPlan
+# Lodestar
 
 **Kargo ve kurye teslimatları için çok duraklı rota optimizasyonu.** Tarayıcıda çalışır,
 kurulum istemez.
@@ -7,14 +7,14 @@ Durakları girersin; uygulama en kısa ziyaret sırasını hesaplar, rotayı ger
 üzerinden çizer, canlı trafiği hesaba katar, şoförüne atar ve teslimatları anlık takip
 etmeni sağlar.
 
-**Canlı demo: https://omer1916.github.io/rotaplan/**
+**Canlı demo: https://omer1916.github.io/lodestar/**
 
 ---
 
 ## Ne işe yarar
 
 Günde 15 adrese teslimat yapan bir kurye, adresleri elle sıraladığında tipik olarak
-%20-30 fazla yol yapar. RotaPlan bu sıralamayı hesaplar ve farkı gösterir:
+%20-30 fazla yol yapar. Lodestar bu sıralamayı hesaplar ve farkı gösterir:
 
 > Optimize sıralama **%31 daha kısa** — girilen sırayla 9,4 km fazla yol yapılacaktı.
 > ~2,8 L · ~128 ₺ yakıt · ~7,6 kg CO₂
@@ -142,7 +142,7 @@ iyi" olduğu garanti edilmez. Sıralamayı sürükleyerek elle de değiştirebil
 ## Proje yapısı
 
 ```
-rotaplan/
+lodestar/
 ├── index.html             # tanıtım / kapak sayfası
 ├── app.html               # planlama ekranı
 ├── driver.html            # şoför ekranı (rota, navigasyon, teslimat, konum)

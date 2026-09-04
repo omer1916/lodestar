@@ -1,6 +1,6 @@
 /* App-shell caching only. Routing, geocoding and Firebase calls always go to the
    network — offline the UI opens but new routes cannot be calculated. */
-var CACHE = 'rotaplan-v9';
+var CACHE = 'lodestar-v10';
 var SHELL = [
   'index.html',
   'app.html',
@@ -24,7 +24,8 @@ var SHELL = [
   'js/ocr.js',
   'js/pdf.js',
   'js/app.js',
-  'manifest.json'
+  'manifest.json',
+  'favicon.svg'
 ];
 
 self.addEventListener('install', function(e){

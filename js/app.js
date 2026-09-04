@@ -699,7 +699,7 @@ var REQUIRE_AUTH = true;
   if(!gate) return;
 
   var logo = gate.querySelector('.logo');
-  if(logo) logo.innerHTML = RP.icons.svg('truck');
+  if(logo) logo.innerHTML = RP.icons.svg('star');
 
   document.getElementById('gateLogin').addEventListener('click', function(){
     if(!RP.authUI.open('login')) showSetupNeeded();

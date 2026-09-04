@@ -3,16 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>RotaPlan — Nasıl Kullanılır</title>
-<meta name="description" content="RotaPlan nasıl kullanılır: hesap açma, durak ekleme, rota optimizasyonu, şoföre gönderme ve teslimat takibi.">
+<title>Lodestar — Nasıl Kullanılır</title>
+<meta name="description" content="Lodestar nasıl kullanılır: hesap açma, durak ekleme, rota optimizasyonu, şoföre gönderme ve teslimat takibi.">
 <meta name="theme-color" content="#3b82f6">
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="css/style.css?v=35">
+<link rel="icon" href="favicon.svg?v=1" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/style.css?v=36">
 </head>
 <body class="plain doc">
 
 <header class="drvbar">
-  <a class="lbrand sm" href="index.html"><span class="logo"></span> RotaPlan</a>
+  <a class="lbrand sm" href="index.html"><span class="logo"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1.8 10 6l4.4.6-3.2 3.1.8 4.4L8 12l-4 2.1.8-4.4L1.6 6.6 6 6z"/></svg></span> Lodestar</a>
   <div class="lnav-actions">
     <a class="btn ghost sm" href="app.html">Uygulamayı aç</a>
     <button class="ico" id="themeBtn" title="Tema değiştir"></button>
@@ -62,7 +64,7 @@
   <section id="ilkrota" class="docsec">
     <h2>İlk rotanı oluştur</h2>
     <div class="shot">
-      <div class="shot-head"><span></span><span></span><span></span> RotaPlan — Planlama</div>
+      <div class="shot-head"><span></span><span></span><span></span> Lodestar — Planlama</div>
       <div class="shot-body">
         <div class="shot-panel">
           <div class="shot-label">Başlangıç noktası</div>
@@ -300,7 +302,7 @@
 
 <div id="toast"></div>
 
-<script src="js/icons.js?v=35"></script>
+<script src="js/icons.js?v=36"></script>
 <script>
 (function(){
   "use strict";
@@ -314,7 +316,7 @@
   themeBtn.addEventListener('click', function(){
     applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
   });
-  document.querySelector('.lbrand .logo').innerHTML = RP.icons.svg('truck');
+  document.querySelector('.lbrand .logo').innerHTML = RP.icons.svg('star');
 
   document.querySelectorAll('.toc a').forEach(function(a){
     a.addEventListener('click', function(e){
