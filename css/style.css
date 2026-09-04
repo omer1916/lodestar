@@ -84,7 +84,7 @@ html:not([data-theme="light"]) .badge.end{color:#f87171}
 
 .btn{
   width:100%;padding:11px;border-radius:10px;border:1px dashed var(--line);background:transparent;
-  color:var(--muted);cursor:pointer;transition:.15s
+  color:var(--muted);cursor:pointer;transition:.15s;text-decoration:none
 }
 .btn:hover{border-color:var(--accent);color:var(--text);background:rgba(59,130,246,.07)}
 .btn.primary{
@@ -438,7 +438,7 @@ body.drv{overflow:visible;height:auto}
 .scText b{display:block;font-size:14px}
 .scText small{display:block;color:var(--muted);font-size:12.5px;line-height:1.45;margin-top:2px;overflow-wrap:anywhere}
 .scActions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.scActions .btn{width:auto;flex:1;min-width:96px;text-align:center;text-decoration:none;
+.scActions .btn{width:auto;flex:1;min-width:96px;text-align:center;
                 display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:10px 12px}
 
 .dstatus{margin-top:11px;padding:9px 11px;border-radius:9px;font-size:12.5px;line-height:1.45;
@@ -593,7 +593,7 @@ html:not([data-theme="light"]) .docwarn{color:#fcd34d}
 
 .docsec .acc{margin-bottom:8px}
 .doccta{text-align:center;padding-top:8px}
-.doccta .btn{width:auto;padding:13px 26px;text-decoration:none;display:inline-block}
+.doccta .btn{width:auto;padding:13px 26px;display:inline-block}
 
 @media (max-width:640px){
   .shot-body{grid-template-columns:1fr}
@@ -610,7 +610,7 @@ html:not([data-theme="light"]) .docwarn{color:#fcd34d}
 .card.rr{border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.08)}
 .rrhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .rrhead b{font-size:14px}
-.card.rr .btnrow .btn{width:auto;flex:1;text-decoration:none;
+.card.rr .btnrow .btn{width:auto;flex:1;
                       display:inline-flex;align-items:center;justify-content:center}
 
 /* ---- usage mode ----
@@ -632,4 +632,4 @@ html:not([data-theme="light"]) .docwarn{color:#fcd34d}
 
 /* driver landing on the planner: their own screen is one tap away */
 .card.drvhint{border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.08)}
-.card.drvhint .btn{width:auto;padding:9px 18px;text-decoration:none;display:inline-block}
+.card.drvhint .btn{width:auto;padding:9px 18px;display:inline-block}
