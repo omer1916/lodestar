@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.svg?v=1" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/style.css?v=44">
+<link rel="stylesheet" href="css/style.css?v=45">
 </head>
 <body class="plain landing">
 
@@ -27,7 +27,9 @@
   <div class="lnav-actions">
     <div id="authSlot"></div>
     <button class="ico" id="themeBtn" title="Tema değiştir"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7z"/></svg></button>
-    <a class="btn primary sm" href="app.html">Uygulamayı aç</a>
+    <!-- only for a signed-in visitor: signed out it just leads to the same
+         sign-in dialog the button beside it already opens -->
+    <a class="btn primary sm" id="openApp" href="app.html" hidden>Uygulamayı aç</a>
   </div>
 </header>
 
@@ -206,11 +208,11 @@
 
   <section class="lcta">
     <h2>Bugünün rotasını şimdi planla</h2>
-    <p>Hesap açmadan deneyebilirsin. Rotalarını kaydetmek ve şoförüne atamak istediğinde giriş yaparsın.</p>
+    <p>Kayıt ücretsiz, kredi kartı istemez. Rotaların hesabına kaydedilir; telefondan da
+      bilgisayardan da aynı listeye ulaşırsın.</p>
     <div class="hero-cta">
-      <a class="btn primary" href="app.html">Ücretsiz başla</a>
-      <button class="btn ghost" id="signupBtn">Hesap oluştur</button>
-        <a class="btn ghost" href="kurulum.html">Nasıl çalışır?</a>
+      <button class="btn primary" id="signupBtn">Hesap oluştur</button>
+      <a class="btn ghost" href="kurulum.html">Nasıl çalışır?</a>
     </div>
   </section>
 </main>
@@ -235,11 +237,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="js/icons.js?v=44"></script>
-<script src="js/firebase-config.js?v=44"></script>
-<script src="js/storage.js?v=44"></script>
-<script src="js/auth.js?v=44"></script>
-<script src="js/auth-ui.js?v=44"></script>
+<script src="js/icons.js?v=45"></script>
+<script src="js/firebase-config.js?v=45"></script>
+<script src="js/storage.js?v=45"></script>
+<script src="js/auth.js?v=45"></script>
+<script src="js/auth-ui.js?v=45"></script>
 <script>
 (function(){
   "use strict";
@@ -276,6 +278,16 @@
   document.getElementById('signupBtn').addEventListener('click', function(){
     if(!RP.authUI.open('register')) toast(needsSetup, true);
   });
+
+  /* "Uygulamayı aç" is the only header route into the planner once signed in, but
+     signed out it lands on the sign-in gate the neighbouring button already opens.
+     With no Firebase at all it stays visible so nothing is unreachable. */
+  var openApp = document.getElementById('openApp');
+  if(RP.auth.available()){
+    RP.auth.onChange(function(user){ openApp.hidden = !user; });
+  } else {
+    openApp.hidden = false;
+  }
 
   /* Someone who registers here as a driver wants their assigned routes, not the
      planner. The profile lands after the session, so this runs again once it does;
