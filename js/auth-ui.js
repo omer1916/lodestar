@@ -93,6 +93,7 @@ RP.authUI = (function(){
         : 'Gideceğin yerleri planla. Filo ve teslimat alanları hiç görünmez.';
       // asking "planner or driver?" makes no sense for someone planning their own trip
       el('roleField').hidden = !work;
+      el('sub').textContent = subFor(b.dataset.u);
     });
 
     el('role').addEventListener('click', function(e){
@@ -137,7 +138,7 @@ RP.authUI = (function(){
     el('title').textContent = isReset ? 'Şifre sıfırla' : (isRegister ? 'Hesap oluştur' : 'Giriş yap');
     el('sub').textContent = isReset
       ? 'E-posta adresine sıfırlama bağlantısı gönderelim.'
-      : 'Rotalarını kaydet, şoförüne ata ve teslimatları takip et.';
+      : subFor(isRegister ? currentUsage() : 'work');
     el('nameField').hidden = !isRegister;
     el('usageField').hidden = !isRegister;
     // the planner/driver split only means something inside a business
@@ -208,6 +209,13 @@ RP.authUI = (function(){
     } else {
       run(btn, RP.auth.signInEmail(email, pass));
     }
+  }
+
+  // promising driver assignment to someone planning their own weekend trip is wrong
+  function subFor(usage){
+    return usage === 'personal'
+      ? 'Rotalarını kaydet, telefondan da bilgisayardan da aynı listeye ulaş.'
+      : 'Rotalarını kaydet, şoförüne ata ve teslimatları takip et.';
   }
 
   function currentUsage(){
