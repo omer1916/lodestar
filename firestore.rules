@@ -1,0 +1,136 @@
+rules_version = '2';
+
+/*
+  RotaPlan — Firestore güvenlik kuralları
+  Firebase konsolu → Firestore Database → Rules bölümüne yapıştırıp "Publish" deyin.
+
+  Erişim modeli
+  -------------
+  Paylaşılan rotalar "linki bilen görebilir" mantığıyla çalışır: rota kimliği
+  Firestore'un ürettiği ~119 bitlik rastgele kimliktir, tahmin edilemez.
+
+  Bu modelin çalışması için `get` (tek doküman) ile `list` (sorgu) ayrılmalıdır.
+  Aksi halde `where('shared','==',true)` sorgusu linki hiç bilmeden TÜM rotaları
+  döker — müşteri adresleri, telefonlar, şoför konumları dahil. Bu yüzden
+  aşağıda `list` yalnızca kendi verisini sorgulayana açıktır.
+*/
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userEmail() {
+      return signedIn() ? request.auth.token.email : null;
+    }
+
+    // Kullanıcı profili: yalnızca sahibi okur ve yazar.
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+
+      // Adres defteri kullanıcının kendi alt koleksiyonu.
+      match /places/{placeId} {
+        allow read, write: if signedIn() && request.auth.uid == uid;
+      }
+    }
+
+    match /routes/{routeId} {
+      function data() {
+        return resource.data;
+      }
+      function incoming() {
+        return request.resource.data;
+      }
+      function isOwner() {
+        return signedIn() && data().owner == request.auth.uid;
+      }
+      /* Atanmamış rotalarda `driverEmail` alanı hiç yoktur; doğrudan okumak
+         kural hatası verir, bu yüzden varsayılanlı get() kullanılır. */
+      function isAssignedDriver() {
+        return signedIn()
+          && userEmail() != null
+          && data().get('driverEmail', '') == userEmail();
+      }
+      function isShared() {
+        return data().get('shared', false) == true;
+      }
+
+      // Tek doküman: linki (yani kimliği) bilen okuyabilir.
+      allow get: if isOwner() || isAssignedDriver() || isShared();
+
+      // Sorgu: yalnızca kendi rotalarını ya da kendine atananları listeleyebilir.
+      // "shared" burada bilerek YOK — olsaydı tüm veritabanı dökülebilirdi.
+      allow list: if isOwner() || isAssignedDriver();
+
+      // Oluşturan kişi kendini sahip yazmak zorunda.
+      allow create: if signedIn() && incoming().owner == request.auth.uid;
+
+      /* Sahibi içeriği düzenler ama sahipliği devredemez — devredebilseydi
+         zararlı bir rota başkasının geçmişine sokulabilirdi. */
+      function ownershipUnchanged() {
+        return incoming().owner == data().owner
+          && incoming().get('createdAt', 0) == data().get('createdAt', 0);
+      }
+
+      /* Şoför (atanmış ya da linki bilen) yalnızca konum alanına dokunabilir,
+         o da doğru biçimde olmak zorunda. */
+      function onlyDriverLocation() {
+        return incoming().diff(data()).affectedKeys().hasOnly(['driverLocation'])
+          && incoming().driverLocation.keys().hasOnly(['lat', 'lon', 'updatedAt'])
+          && incoming().driverLocation.lat is number
+          && incoming().driverLocation.lon is number
+          && incoming().driverLocation.lat >= -90 && incoming().driverLocation.lat <= 90
+          && incoming().driverLocation.lon >= -180 && incoming().driverLocation.lon <= 180;
+      }
+
+      allow update: if (isOwner() && ownershipUnchanged())
+        || ((isAssignedDriver() || (signedIn() && isShared())) && onlyDriverLocation());
+
+      allow delete: if isOwner();
+
+      match /deliveries/{stopId} {
+        function route() {
+          return get(/databases/$(database)/documents/routes/$(routeId)).data;
+        }
+        function routeExists() {
+          return exists(/databases/$(database)/documents/routes/$(routeId));
+        }
+        function parentOwner() {
+          return signedIn() && routeExists() && route().owner == request.auth.uid;
+        }
+        function parentDriver() {
+          return signedIn() && routeExists()
+            && userEmail() != null
+            && route().get('driverEmail', '') == userEmail();
+        }
+        function parentShared() {
+          return routeExists() && route().get('shared', false) == true;
+        }
+
+        /* Teslimat kaydı biçimi: beklenmeyen alan, hatalı durum değeri ya da
+           devasa bir fotoğraf yazılamaz. */
+        function validDelivery() {
+          let d = request.resource.data;
+          return d.keys().hasOnly(['status', 'note', 'reason', 'stopNo', 'label', 'photo', 'at', 'by'])
+            && d.status in ['delivered', 'failed']
+            && d.get('note', '') is string && d.get('note', '').size() < 500
+            && d.get('reason', '') is string && d.get('reason', '').size() < 200
+            && d.get('label', '') is string && d.get('label', '').size() < 500
+            && d.get('photo', '') is string && d.get('photo', '').size() < 400000;
+        }
+
+        // Okuma: rota kimliğini zaten bilmek gerekiyor.
+        allow read: if parentOwner() || parentDriver() || parentShared();
+
+        // Yazma: linki bilen kurye de işaretleyebilmeli (hesapsız şoför akışı).
+        allow create, update: if (parentOwner() || parentDriver() || (signedIn() && parentShared()))
+          && validDelivery();
+
+        // Silme yalnızca rota sahibinde: teslimat kanıtı başkası tarafından yok edilemesin.
+        allow delete: if parentOwner();
+      }
+    }
+  }
+}

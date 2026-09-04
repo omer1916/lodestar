@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RotaPlan — Kargo ve Kurye Rota Optimizasyonu</title>
+<meta name="description" content="Teslimat duraklarını gir, RotaPlan en kısa rotayı çizsin. Çoklu araç, kapasite, zaman penceresi, canlı trafik, şoför takibi ve teslimat kanıtı — tarayıcıda, ücretsiz.">
+<meta name="theme-color" content="#3b82f6">
+<meta property="og:title" content="RotaPlan — Kargo ve Kurye Rota Optimizasyonu">
+<meta property="og:description" content="Çok duraklı teslimat rotalarını canlı trafiğe göre optimize et, şoförüne ata, teslimatları anlık takip et.">
+<meta property="og:type" content="website">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css?v=35">
+</head>
+<body class="plain landing">
+
+<header class="lnav">
+  <a class="lbrand" href="index.html"><span class="logo"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 4h10v8H1z"/><path d="M11 7h3l1.5 2.5V12H11z"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg></span> RotaPlan</a>
+  <nav class="lnav-links">
+    <a href="#features">Özellikler</a>
+    <a href="#how">Nasıl çalışır</a>
+    <a href="#roles">Kimler için</a>
+    <a href="kurulum.html">Nasıl çalışır</a>
+  </nav>
+  <div class="lnav-actions">
+    <div id="authSlot"></div>
+    <button class="ico" id="themeBtn" title="Tema değiştir"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7z"/></svg></button>
+    <a class="btn primary sm" href="app.html">Uygulamayı aç</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-text">
+      <span class="badge-pill">Ücretsiz · Kurulum gerektirmez</span>
+      <h1>Teslimat rotanı <span class="grad">saniyeler içinde</span> planla.</h1>
+      <p class="lead">
+        Durakları yaz, fotoğraftan ya da CSV'den yükle. RotaPlan en kısa sırayı hesaplar,
+        gerçek yol ağı üzerinden çizer, canlı trafiği hesaba katar; şoförüne atar ve
+        teslimatları anlık takip edersin.
+      </p>
+      <div class="hero-cta">
+        <a class="btn primary" href="app.html">Ücretsiz başla</a>
+        <a class="btn ghost" href="#how">Nasıl çalışır?</a>
+      </div>
+      <ul class="hero-points">
+        <li>Hesap açmadan da kullanılabilir</li>
+        <li>Kredi kartı istemez</li>
+        <li>Telefonda da çalışır</li>
+      </ul>
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 460 360" role="img">
+        <defs>
+          <linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#22c55e"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="460" height="360" rx="18" class="art-bg"/>
+        <path d="M20 300 H200 V150 H300 V60 H440" class="art-road"/>
+        <path d="M20 200 H120 V90" class="art-road"/>
+        <path d="M240 340 V220 H380 V120" class="art-road"/>
+        <path d="M70 300 H200 V150 H300 V60 H420" class="art-route"/>
+        <g class="art-pin"><circle cx="70" cy="300" r="15" fill="#22c55e"/><text x="70" y="305">B</text></g>
+        <g class="art-pin"><circle cx="200" cy="215" r="14" fill="url(#rg)"/><text x="200" y="220">1</text></g>
+        <g class="art-pin"><circle cx="255" cy="150" r="14" fill="url(#rg)"/><text x="255" y="155">2</text></g>
+        <g class="art-pin"><circle cx="300" cy="105" r="14" fill="url(#rg)"/><text x="300" y="110">3</text></g>
+        <g class="art-pin"><circle cx="420" cy="60" r="15" fill="#ef4444"/><text x="420" y="65">V</text></g>
+        <g class="art-card">
+          <rect x="26" y="26" width="196" height="78" rx="12"/>
+          <text x="44" y="56" class="art-k">45,1 km · 1 sa 2 dk</text>
+          <text x="44" y="80" class="art-s">%27 daha kısa rota</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section class="stripe">
+    <div class="stripe-item"><b>%20-30</b><span>tipik mesafe tasarrufu</span></div>
+    <div class="stripe-item"><b>6</b><span>araca kadar planlama</span></div>
+    <div class="stripe-item"><b>Canlı</b><span>trafik ve şoför takibi</span></div>
+    <div class="stripe-item"><b>0 ₺</b><span>kurulum ve lisans</span></div>
+  </section>
+
+  <section id="features" class="lsec">
+    <h2>Gerçek teslimat işine göre tasarlandı</h2>
+    <p class="lsec-sub">Sadece "en kısa yol" değil; kapasite, zaman ve saha gerçekleri.</p>
+    <div class="fgrid">
+      <article class="fcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.2"/><path d="M10.6 5.4 9.2 9.2 5.4 10.6 6.8 6.8z"/></svg></div>
+        <h3>Akıllı sıralama</h3>
+        <p>Nearest-neighbor + 2-opt, kalabalık listelerde simulated annealing. Sıralama gerçek yol mesafesine göre yapılır, kuş uçuşuna göre değil.</p>
+      </article>
+      <article class="fcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="4.5" y="1.5" width="7" height="13" rx="2"/><circle cx="8" cy="5" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="8" cy="11" r="1.2"/></svg></div>
+        <h3>Canlı trafik</h3>
+        <p>TomTom entegrasyonu ile o anki trafiğe göre süre ve rota. Anahtar yoksa ücretsiz OSRM ile trafiksiz hesaplar.</p>
+      </article>
+      <article class="fcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 1.6 14 5v6l-6 3.4L2 11V5z"/><path d="M2 5l6 3.4L14 5"/><path d="M8 8.4v6"/></svg></div>
+        <h3>Kapasite ve çoklu araç</h3>
+        <p>Araç başına yük sınırı; duraklar araçlara otomatik dağıtılır, her araç kendi renginde çizilir.</p>
+      </article>
+      <article class="fcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.4V8l2.6 1.6"/></svg></div>
+        <h3>Zaman penceresi</h3>
+        <p>"09:00-11:00 arası teslim" gibi kısıtlar sıralamayı etkiler, gecikme riski olan duraklar işaretlenir.</p>
+      </article>
+      <article class="fcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.5 5h3l1-1.7h5L11.5 5h3v8.5h-13z"/><circle cx="8" cy="8.9" r="2.8"/></svg></div>
+        <h3>Fotoğraftan adres</h3>
+        <p>Elindeki teslimat listesinin fotoğrafını çek; OCR satırları okur, hepsini tek seferde durak yapar.</p>
+      </article>
+      <article class="fcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 14.5s5-4.7 5-8a5 5 0 0 0-10 0c0 3.3 5 8 5 8z"/><circle cx="8" cy="6.4" r="1.9"/></svg></div>
+        <h3>Canlı şoför takibi</h3>
+        <p>Şoförün konumu haritada anlık görünür; teslim edilen ve edilemeyen duraklar canlı işaretlenir.</p>
+      </article>
+      <article class="fcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 6V2h8v4"/><path d="M2 6h12v5h-2.5"/><path d="M4.5 11H2"/><path d="M4 10h8v4.5H4z"/></svg></div>
+        <h3>Yazdırılabilir liste</h3>
+        <p>Şoförün eline verilecek sıralı teslimat listesi — tek tıkla yazdır ya da PDF olarak kaydet.</p>
+      </article>
+      <article class="fcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="4" y="1.5" width="8" height="13" rx="1.6"/><path d="M7 12.4h2"/></svg></div>
+        <h3>Telefona kurulabilir</h3>
+        <p>PWA olarak ana ekrana eklenir, uygulama gibi açılır. Mağazadan indirmeye gerek yok.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="how" class="lsec alt">
+    <h2>Üç adımda hazır</h2>
+    <div class="steps3">
+      <div class="s3">
+        <div class="s3n">1</div>
+        <h3>Durakları gir</h3>
+        <p>Adres yaz, haritadan tıkla, CSV yükle ya da listenin fotoğrafını çek. Başlangıç noktası konumundan otomatik gelir.</p>
+      </div>
+      <div class="s3">
+        <div class="s3n">2</div>
+        <h3>Optimize et</h3>
+        <p>Araç sayısı, kapasite ve çıkış saatini seç. Rota gerçek yol ağı ve canlı trafiğe göre saniyeler içinde çizilir.</p>
+      </div>
+      <div class="s3">
+        <div class="s3n">3</div>
+        <h3>Şoföre gönder</h3>
+        <p>Linki paylaş ya da şoförüne ata. Şoför navigasyonu açar, teslimatı işaretler; sen anlık takip edersin.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="roles" class="lsec">
+    <h2>Kimler için</h2>
+    <div class="roles2">
+      <article class="rcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5.5 3H4a1 1 0 0 0-1 1v9.5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-1.5"/><path d="M5.5 1.8h5v2.4h-5z"/></svg></div>
+        <h3>Planlayıcı / işletme</h3>
+        <ul>
+          <li>Günlük teslimat listesini tek ekranda planla</li>
+          <li>Araçlara kapasiteye göre otomatik dağıt</li>
+          <li>Rota geçmişini sakla, tekrar kullan</li>
+          <li>Teslimat durumunu canlı izle</li>
+        </ul>
+        <a class="btn ghost" href="app.html">Planlamaya başla</a>
+      </article>
+      <article class="rcard">
+        <div class="fi"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 4h10v8H1z"/><path d="M11 7h3l1.5 2.5V12H11z"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg></div>
+        <h3>Şoför / kurye</h3>
+        <ul>
+          <li>Sıralı durak listesi ve sıradaki adres</li>
+          <li>Tek dokunuşla Google Maps veya Yandex Navigasyon</li>
+          <li>Teslim edildi / edilemedi işaretle, not ve fotoğraf ekle</li>
+          <li>Konumunu paylaş, merkez seni görsün</li>
+        </ul>
+        <a class="btn ghost" href="driver.html">Şoför ekranı</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="lcta">
+    <h2>Bugünün rotasını şimdi planla</h2>
+    <p>Hesap açmadan deneyebilirsin. Rotalarını kaydetmek ve şoförüne atamak istediğinde giriş yaparsın.</p>
+    <div class="hero-cta">
+      <a class="btn primary" href="app.html">Ücretsiz başla</a>
+      <button class="btn ghost" id="signupBtn">Hesap oluştur</button>
+        <a class="btn ghost" href="kurulum.html">Nasıl çalışır?</a>
+    </div>
+  </section>
+</main>
+
+<footer class="lfoot">
+  <div>
+    <a class="lbrand sm" href="index.html"><span class="logo"><svg class="ic " viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 4h10v8H1z"/><path d="M11 7h3l1.5 2.5V12H11z"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg></span> RotaPlan</a>
+    <p>Çok duraklı teslimat rotası optimizasyonu. Harita verisi © OpenStreetMap katkıcıları,
+       rota servisi OSRM / TomTom.</p>
+  </div>
+  <nav>
+    <a href="app.html">Planlama</a>
+    <a href="driver.html">Şoför</a>
+    <a href="stats.html">Özet</a>
+    <a href="kurulum.html">Nasıl çalışır</a>
+    <a href="#features">Özellikler</a>
+  </nav>
+</footer>
+
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/icons.js?v=35"></script>
+<script src="js/firebase-config.js?v=35"></script>
+<script src="js/storage.js?v=35"></script>
+<script src="js/auth.js?v=35"></script>
+<script src="js/auth-ui.js?v=35"></script>
+<script>
+(function(){
+  "use strict";
+
+  var themeBtn = document.getElementById('themeBtn');
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    themeBtn.innerHTML = RP.icons.svg(t === 'light' ? 'sun' : 'moon');
+    localStorage.setItem('rp_theme', t);
+  }
+  applyTheme(localStorage.getItem('rp_theme') || 'dark');
+  themeBtn.addEventListener('click', function(){
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+  });
+
+  var toastEl = document.getElementById('toast'), toastT;
+  function toast(msg, isErr){
+    toastEl.textContent = msg;
+    toastEl.className = 'on' + (isErr ? ' err' : '');
+    clearTimeout(toastT);
+    toastT = setTimeout(function(){ toastEl.className = ''; }, 3600);
+  }
+
+  RP.storage.adoptConfigFromHash();
+  if(RP.auth.available()) RP.auth.start();
+
+  var needsSetup = 'Giriş için önce planlama ekranındaki Ayarlar bölümünden Firebase yapılandırmasını ekle';
+  RP.authUI.mountHeader(document.getElementById('authSlot'), {
+    onUnavailable: function(){ toast(needsSetup, true); },
+    onSignedIn: function(){ toast('Giriş yapıldı'); },
+    onSignedOut: function(){ toast('Çıkış yapıldı'); }
+  });
+
+  document.getElementById('signupBtn').addEventListener('click', function(){
+    if(!RP.authUI.open('register')) toast(needsSetup, true);
+  });
+
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var t = document.querySelector(this.getAttribute('href'));
+      if(!t) return;
+      e.preventDefault();
+      t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+})();
+</script>
+</body>
+</html>

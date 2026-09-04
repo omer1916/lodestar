@@ -1,0 +1,38 @@
+{
+  "name": "RotaPlan — Kargo Rota Optimizasyonu",
+  "short_name": "RotaPlan",
+  "description": "Çok duraklı teslimat rotası optimizasyonu: kapasite, zaman penceresi, canlı trafik, şoför takibi ve teslimat kanıtı.",
+  "start_url": "app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0e1116",
+  "theme_color": "#3b82f6",
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Yeni rota planla",
+      "url": "app.html",
+      "description": "Planlama ekranını aç"
+    },
+    {
+      "name": "Şoför modu",
+      "url": "driver.html",
+      "description": "Rotanı ve teslimatlarını aç"
+    }
+  ]
+}

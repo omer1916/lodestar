@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RotaPlan — Özet</title>
+<meta name="theme-color" content="#3b82f6">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css?v=35">
+</head>
+<body class="plain drv">
+
+<header class="drvbar">
+  <a class="lbrand sm" href="index.html"><span class="logo"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 4h10v8H1z"/><path d="M11 7h3l1.5 2.5V12H11z"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg></span> Özet</a>
+  <div class="lnav-actions">
+    <a class="btn ghost sm" href="app.html">Planlama</a>
+    <div id="authSlot"></div>
+    <button class="ico" id="themeBtn" title="Tema değiştir"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7z"/></svg></button>
+  </div>
+</header>
+
+<main class="drvwrap">
+  <h1 class="drvh1">Rota özeti</h1>
+  <p class="hint" id="sub">Kaydedilmiş rotalarından hesaplanır.</p>
+  <div id="body"><p class="hint">Yükleniyor…</p></div>
+</main>
+
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/icons.js?v=35"></script>
+<script src="js/firebase-config.js?v=35"></script>
+<script src="js/storage.js?v=35"></script>
+<script src="js/auth.js?v=35"></script>
+<script src="js/auth-ui.js?v=35"></script>
+<script src="js/delivery.js?v=35"></script>
+<script>
+(function(){
+"use strict";
+
+var themeBtn = document.getElementById('themeBtn');
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.innerHTML = RP.icons.svg(t === 'light' ? 'sun' : 'moon');
+  localStorage.setItem('rp_theme', t);
+}
+applyTheme(localStorage.getItem('rp_theme') || 'dark');
+themeBtn.addEventListener('click', function(){
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+});
+
+var toastEl = document.getElementById('toast'), toastT;
+function toast(msg, isErr){
+  toastEl.textContent = msg;
+  toastEl.className = 'on' + (isErr ? ' err' : '');
+  clearTimeout(toastT);
+  toastT = setTimeout(function(){ toastEl.className = ''; }, 3600);
+}
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function fmtKm(m){ return (m/1000).toFixed(1).replace('.', ',') + ' km'; }
+function fmtDur(s){
+  var h = Math.floor(s/3600), m = Math.round((s%3600)/60);
+  return h > 0 ? (h + ' sa ' + m + ' dk') : (m + ' dk');
+}
+
+RP.storage.adoptConfigFromHash();
+if(RP.auth.available()) RP.auth.start();
+RP.authUI.mountHeader(document.getElementById('authSlot'), {
+  onUnavailable: function(){ toast('Önce planlama ekranından Firebase yapılandırmasını ekle', true); }
+});
+
+var body = document.getElementById('body');
+
+if(!RP.storage.isConfigured()){
+  body.innerHTML = '<div class="card"><b>Firebase gerekli</b>' +
+    '<p class="hint" style="margin-top:8px">Özet, kaydedilmiş rotalardan hesaplanır. ' +
+    'Planlama ekranındaki Ayarlar bölümünden Firebase yapılandırmasını ekledikten sonra burası dolar.</p></div>';
+} else {
+  load();
+}
+
+function load(){
+  RP.storage.listHistory(100).then(function(routes){
+    if(!routes.length){
+      body.innerHTML = '<div class="card"><b>Henüz kayıtlı rota yok</b>' +
+        '<p class="hint" style="margin-top:8px">Planlama ekranında bir rota oluşturup ' +
+        '"Kaydet & paylaş" dedikten sonra burada özetini görürsün.</p></div>';
+      return;
+    }
+    // delivery records live in a subcollection, so fetch them per route
+    return Promise.all(routes.map(function(r){
+      return RP.storage.listDeliveries(r.id).then(function(map){ return { route: r, deliveries: map }; })
+        .catch(function(){ return { route: r, deliveries: {} }; });
+    })).then(render);
+  }).catch(function(err){
+    body.innerHTML = '<div class="card"><b>Özet yüklenemedi</b>' +
+      '<p class="hint" style="margin-top:8px">' + esc(err.message) + '</p></div>';
+  });
+}
+
+function render(rows){
+  var totalDistance = 0, totalDuration = 0, totalStops = 0;
+  var delivered = 0, failed = 0, pending = 0, onTime = 0, timed = 0;
+
+  rows.forEach(function(row){
+    var r = row.route;
+    totalDistance += r.totalDistance || 0;
+    totalDuration += r.totalDuration || 0;
+    var steps = [];
+    (r.vehicles || []).forEach(function(v, vi){
+      (v.steps || []).forEach(function(s, si){
+        steps.push(Object.assign({ stopId: s.stopId || ('v'+vi+'s'+si) }, s));
+      });
+    });
+    var sum = RP.delivery.summarize(steps, row.deliveries);
+    totalStops += sum.total;
+    delivered += sum.delivered;
+    failed += sum.failed;
+    pending += sum.pending;
+
+    steps.forEach(function(s){
+      if(s.kind !== 'stop' || s.windowEnd == null) return;
+      timed++;
+      if(!s.late) onTime++;
+    });
+  });
+
+  var fuelLp100 = parseFloat(localStorage.getItem('rp_fuel_lp100')) || 9.5;
+  var fuelPrice = parseFloat(localStorage.getItem('rp_fuel_price')) || 45;
+  var litres = (totalDistance / 1000) * fuelLp100 / 100;
+
+  var successRate = (delivered + failed) ? Math.round(delivered / (delivered + failed) * 100) : 0;
+  var punctuality = timed ? Math.round(onTime / timed * 100) : null;
+
+  var recent = rows.slice(0, 10).map(function(row){
+    var r = row.route;
+    var sum = RP.delivery.summarize(
+      (r.vehicles || []).reduce(function(acc, v, vi){
+        (v.steps || []).forEach(function(s, si){
+          acc.push(Object.assign({ stopId: s.stopId || ('v'+vi+'s'+si) }, s));
+        });
+        return acc;
+      }, []), row.deliveries);
+    return '<div class="histrow" style="cursor:default">' +
+      '<div style="flex:1;min-width:0">' +
+        '<b>' + new Date(r.createdAt || Date.now()).toLocaleDateString('tr-TR') + ' · ' +
+        fmtKm(r.totalDistance || 0) + '</b>' +
+        '<small>' + sum.total + ' durak · ' + sum.delivered + ' teslim' +
+        (sum.failed ? ' · ' + sum.failed + ' başarısız' : '') + '</small>' +
+      '</div>' +
+      '<a class="btn ghost sm" href="view.html?route=' + esc(r.id) + '">Aç</a></div>';
+  }).join('');
+
+  body.innerHTML =
+    '<div class="card">' +
+      '<div class="stats">' +
+        '<div class="stat"><b>' + rows.length + '</b><span>Kayıtlı rota</span></div>' +
+        '<div class="stat"><b>' + fmtKm(totalDistance) + '</b><span>Toplam mesafe</span></div>' +
+        '<div class="stat"><b>' + fmtDur(totalDuration) + '</b><span>Toplam süre</span></div>' +
+        '<div class="stat"><b>' + totalStops + '</b><span>Toplam durak</span></div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="card">' +
+      '<label class="lbl">Teslimat</label>' +
+      '<div class="progbar"><span style="width:' +
+        (totalStops ? Math.round((delivered + failed) / totalStops * 100) : 0) + '%"></span></div>' +
+      '<p class="hint" style="margin:8px 0 0">' + delivered + ' teslim · ' + failed +
+        ' başarısız · ' + pending + ' bekliyor</p>' +
+      (delivered + failed
+        ? '<div class="save" style="margin-top:10px">' + RP.icons.svg('check','ok') + 'Teslim başarı oranı <b>%' + successRate + '</b></div>'
+        : '<div class="save zero" style="margin-top:10px">Henüz teslimat işaretlenmemiş.</div>') +
+      (punctuality != null
+        ? '<div class="save' + (punctuality >= 80 ? '' : ' warn') + '" style="margin-top:8px">' + RP.icons.svg('clock') + 'Zaman penceresine uyum <b>%' +
+          punctuality + '</b> <small style="display:block;color:var(--muted);margin-top:3px">' +
+          timed + ' zaman kısıtlı durak üzerinden</small></div>'
+        : '') +
+    '</div>' +
+
+    '<div class="card">' +
+      '<label class="lbl">Tahmini maliyet</label>' +
+      '<div class="stats" style="margin-top:6px">' +
+        '<div class="stat"><b>' + Math.round(litres).toLocaleString('tr-TR') + ' L</b><span>Yakıt</span></div>' +
+        '<div class="stat"><b>' + Math.round(litres * fuelPrice).toLocaleString('tr-TR') + ' ₺</b><span>Yakıt gideri</span></div>' +
+      '</div>' +
+      '<p class="hint" style="margin:8px 0 0">' + fuelLp100 + ' L/100 km ve ' + fuelPrice +
+        ' ₺/L varsayımıyla; değerleri planlama ekranındaki Ayarlar bölümünden değiştirebilirsin.</p>' +
+    '</div>' +
+
+    '<div class="card"><label class="lbl">Son rotalar</label>' + recent + '</div>';
+}
+})();
+</script>
+</body>
+</html>

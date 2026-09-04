@@ -1,0 +1,11 @@
+# geliştirme sırasında üretilen geçici test dosyaları
+__*.html
+__*.js
+__*.txt
+
+# editör / işletim sistemi
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store

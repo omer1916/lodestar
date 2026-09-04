@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RotaPlan — Rota Takibi</title>
+<meta name="theme-color" content="#3b82f6">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="css/style.css?v=35">
+</head>
+<body>
+<div class="app">
+  <aside class="panel">
+    <header>
+      <div class="htxt">
+        <h1><span class="logo"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 4h10v8H1z"/><path d="M11 7h3l1.5 2.5V12H11z"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg></span> Rota Takibi</h1>
+        <p id="sub">Paylaşılan teslimat rotası — salt okunur görünüm.</p>
+      </div>
+      <button class="ico" id="themeBtn" title="Tema değiştir"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7z"/></svg></button>
+    </header>
+    <div class="scroll" id="panel">
+      <p class="hint"><span class="spin"></span>Rota yükleniyor…</p>
+    </div>
+  </aside>
+  <main id="map"></main>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/icons.js?v=35"></script>
+<script src="js/firebase-config.js?v=35"></script>
+<script src="js/storage.js?v=35"></script>
+<script src="js/delivery.js?v=35"></script>
+<script src="js/pdf.js?v=35"></script>
+<script>
+(function(){
+"use strict";
+
+var themeBtn = document.getElementById('themeBtn');
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.innerHTML = RP.icons.svg(t === 'light' ? 'sun' : 'moon');
+  localStorage.setItem('rp_theme', t);
+}
+applyTheme(localStorage.getItem('rp_theme') || 'dark');
+themeBtn.addEventListener('click', function(){
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+});
+
+/* Colours come from the stored route, so they are validated rather than trusted:
+   anything that is not a plain hex colour is replaced with the default. */
+function safeColor(c){
+  return /^#[0-9a-fA-F]{3,8}$/.test(String(c || '')) ? String(c) : '#3b82f6';
+}
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function fmtKm(m){ return (m/1000).toFixed(1).replace('.', ',') + ' km'; }
+function fmtDur(s){
+  var h = Math.floor(s/3600), m = Math.round((s%3600)/60);
+  return h > 0 ? (h + ' sa ' + m + ' dk') : (m + ' dk');
+}
+var fmtClock = RP.pdf.fmtClock;
+
+var map = L.map('map', {zoomControl:true}).setView([40.1885, 29.0610], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+var layerRoute = L.layerGroup().addTo(map);
+var layerLive = L.layerGroup().addTo(map);
+var liveMarker = null;
+
+function pinIcon(cls, label, color){
+  var style = color ? ' style="background:'+color+'"' : '';
+  return L.divIcon({
+    className:'', html:'<div class="pinmk '+cls+'"'+style+'><span>'+label+'</span></div>',
+    iconSize:[28,28], iconAnchor:[14,28], popupAnchor:[0,-26]
+  });
+}
+
+var routeId = new URLSearchParams(location.search).get('route');
+var panel = document.getElementById('panel');
+var routeData = null;   // the loaded route, shared with the delivery-status listener
+RP.storage.adoptConfigFromHash();
+
+if(!routeId){
+  panel.innerHTML = '<p class="hint">Geçersiz link — rota kimliği eksik.</p>';
+} else if(!RP.storage.isConfigured()){
+  panel.innerHTML = '<p class="hint">Bu link eksik görünüyor — rota verisine erişmek için gereken ' +
+    'yapılandırma linkte yok. Planlama ekranından üretilen tam linki kullan.</p>';
+} else {
+  RP.storage.loadRoute(routeId).then(function(data){
+    routeData = data;
+    render(data);
+    subscribeLive(routeId);
+    subscribeDeliveryStatus(routeId);
+  }).catch(function(err){
+    panel.innerHTML = '<p class="hint">Rota yüklenemedi: ' + esc(err.message) + '</p>';
+  });
+}
+
+function render(data){
+  var all = [];
+  (data.vehicles||[]).forEach(function(v){
+    var latlngs = (v.coordinates||[]).map(function(c){ return [c.lat, c.lon]; });
+    all = all.concat(latlngs);
+    L.polyline(latlngs, { color: safeColor(v.color), weight:5, opacity:.85, lineJoin:'round' }).addTo(layerRoute);
+    (v.steps||[]).forEach(function(p){
+      var cls = p.kind === 'start' ? 'st' : (p.kind === 'end' ? 'en' : 'md');
+      var lbl = p.kind === 'start' ? 'B' : (p.kind === 'end' ? 'V' : esc(String(p.stopNo || '')));
+      L.marker([p.lat, p.lon], { icon: pinIcon(cls, lbl, p.kind==='stop' ? safeColor(v.color) : null) })
+        .bindPopup('<b>' + (p.kind==='start'?'Başlangıç':p.kind==='end'?'Varış':'Durak '+esc(p.stopNo)) + '</b><br>' +
+                   esc(p.label) + (p.eta != null ? '<br><small>Tahmini varış: ' + fmtClock(p.eta) + '</small>' : ''))
+        .addTo(layerRoute);
+    });
+  });
+  if(all.length) map.fitBounds(L.latLngBounds(all), {padding:[40,40], maxZoom: 16});
+
+  var vehiclesHtml = (data.vehicles||[]).map(function(v, vi){
+    var steps = (v.steps||[]).map(function(p, si){
+      var cls = p.kind==='start' ? 's' : (p.kind==='end' ? 'e' : '');
+      var num = p.kind==='start' ? 'B' : (p.kind==='end' ? 'V' : esc(p.stopNo));
+      var title = p.kind==='start' ? 'Başlangıç' : (p.kind==='end' ? 'Varış' : ('Durak ' + esc(p.stopNo)));
+      var sid = p.stopId || ('v' + vi + 's' + si);
+      return '<li data-stop="'+esc(sid)+'"><div class="num '+cls+'">'+num+'</div><div class="stp">' +
+        '<b>'+title+'</b><small>'+esc(p.label)+'</small>' +
+        (p.eta != null ? '<span class="'+(p.late?'late':'eta')+'">' + RP.icons.svg('clock') + fmtClock(p.eta) + (p.late?' — geç':'') + '</span>' : '') +
+        '<span class="dtag" hidden></span>' +
+        '</div></li>';
+    }).join('');
+    return '<div class="card">' +
+      '<div class="vhead"><span class="vdot" style="background:'+safeColor(v.color)+'"></span>' +
+      '<b style="font-size:13px">Araç ' + (vi+1) + '</b>' +
+      '<span class="pill off">' + fmtKm(v.distance||0) + ' · ' + fmtDur(v.duration||0) + '</span></div>' +
+      '<ol class="steps">' + steps + '</ol></div>';
+  }).join('');
+
+  panel.innerHTML =
+    '<div class="card">' +
+      '<div class="stats">' +
+        '<div class="stat"><b>' + fmtKm(data.totalDistance||0) + '</b><span>Toplam mesafe</span></div>' +
+        '<div class="stat"><b>' + fmtDur(data.totalDuration||0) + '</b><span>Toplam süre</span></div>' +
+      '</div>' +
+      '<div class="save zero" id="liveStatus" style="margin-top:10px">Şoför konumu bekleniyor…</div>' +
+      '<div id="deliveryProgress"></div>' +
+      '<button class="btn ghost" id="printBtn" style="margin-top:10px">' + RP.icons.svg('printer') + 'Yazdır / PDF</button>' +
+    '</div>' + vehiclesHtml;
+
+  document.getElementById('sub').textContent =
+    new Date(data.createdAt).toLocaleString('tr-TR') + ' tarihli teslimat rotası';
+
+  document.getElementById('printBtn').addEventListener('click', function(){
+    RP.pdf.print({
+      vehicles: (data.vehicles||[]).map(function(v){
+        return {
+          steps: v.steps || [],
+          distanceText: fmtKm(v.distance||0),
+          durationText: fmtDur(v.duration||0),
+          load: v.load
+        };
+      })
+    }, {
+      date: new Date(data.createdAt).toLocaleDateString('tr-TR'),
+      startTime: fmtClock((data.options||{}).startTime || 540),
+      totalDistance: fmtKm(data.totalDistance||0),
+      totalDuration: fmtDur(data.totalDuration||0)
+    });
+  });
+}
+
+/* Phone rotation / address-bar changes resize the map container; Leaflet needs
+   to be told or it renders grey strips at the old size. */
+var resizeTimer = null;
+function refreshMapSize(){
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function(){ map.invalidateSize(); }, 180);
+}
+window.addEventListener('resize', refreshMapSize);
+window.addEventListener('orientationchange', function(){ setTimeout(refreshMapSize, 120); });
+
+
+/* Delivery status arrives from the driver's screen and is reflected here live,
+   both as a progress bar and as a tag on each stop. */
+function subscribeDeliveryStatus(id){
+  RP.storage.subscribeDeliveries(id, function(map){
+    var steps = [];
+    (routeData.vehicles || []).forEach(function(v, vi){
+      (v.steps || []).forEach(function(s, si){
+        steps.push(Object.assign({ stopId: s.stopId || ('v'+vi+'s'+si) }, s));
+      });
+    });
+    var sum = RP.delivery.summarize(steps, map);
+    var box = document.getElementById('deliveryProgress');
+    if(box && sum.total){
+      box.innerHTML =
+        '<label class="lbl" style="margin-top:12px">Teslimat</label>' +
+        '<div class="progbar"><span style="width:' + sum.percent + '%"></span></div>' +
+        '<p class="hint" style="margin:8px 0 0">' + sum.delivered + ' teslim · ' +
+          sum.failed + ' başarısız · ' + sum.pending + ' bekliyor</p>';
+    }
+    steps.forEach(function(s){
+      var li = document.querySelector('li[data-stop="' + s.stopId + '"] .dtag');
+      if(!li) return;
+      var d = map[s.stopId];
+      if(!d){ li.hidden = true; return; }
+      li.hidden = false;
+      li.className = 'dtag ' + RP.delivery.statusClass(d.status);
+      li.innerHTML = (d.status === 'delivered' ? RP.icons.svg('check','ok') : RP.icons.svg('warn','bad')) +
+        esc(RP.delivery.statusLabel(d.status) + (d.reason ? ' — ' + d.reason : ''));
+    });
+  });
+}
+
+function subscribeLive(id){
+  RP.storage.subscribeDriverLocation(id, function(loc){
+    var icon = L.divIcon({ className:'', html:'<div class="truckmk"><svg viewBox="0 0 16 16" width="17" height="17" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4h10v8H1z"/><path d="M11 7h3l1.5 2.5V12H11z"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg></div>', iconSize:[34,34], iconAnchor:[17,17] });
+    if(!liveMarker){
+      liveMarker = L.marker([loc.lat, loc.lon], { icon: icon, zIndexOffset: 1000 }).addTo(layerLive);
+    } else {
+      liveMarker.setLatLng([loc.lat, loc.lon]);
+    }
+    var el = document.getElementById('liveStatus');
+    if(el){
+      el.className = 'save';
+      el.innerHTML = '<span class="livedot"></span>Şoför canlı takipte — son güncelleme ' +
+        new Date(loc.updatedAt).toLocaleTimeString('tr-TR');
+    }
+  });
+}
+
+})();
+</script>
+<div id="printArea"></div>
+</body>
+</html>

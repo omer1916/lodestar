@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RotaPlan — Şoför</title>
+<meta name="theme-color" content="#3b82f6">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css?v=35">
+</head>
+<body class="plain drv">
+
+<header class="drvbar">
+  <a class="lbrand sm" href="index.html"><span class="logo"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 4h10v8H1z"/><path d="M11 7h3l1.5 2.5V12H11z"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg></span> Şoför</a>
+  <div class="lnav-actions">
+    <div id="authSlot"></div>
+    <button class="ico" id="themeBtn" title="Tema değiştir"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7z"/></svg></button>
+  </div>
+</header>
+
+<main class="drvwrap">
+  <!-- shown when there is no route in the URL: the driver's own assigned routes -->
+  <section id="listView" hidden>
+    <h1 class="drvh1">Rotalarım</h1>
+    <p class="hint" id="listHint">Sana atanan rotalar burada görünür.</p>
+    <div id="routeList"></div>
+  </section>
+
+  <!-- the working screen for one route -->
+  <section id="routeView" hidden>
+    <div class="card">
+      <div class="progresshead">
+        <div>
+          <b id="routeTitle">Rota</b>
+          <small id="routeMeta"></small>
+        </div>
+        <span class="pill off" id="progPill">0/0</span>
+      </div>
+      <div class="progbar"><span id="progFill"></span></div>
+      <div class="btnrow" style="margin-top:12px">
+        <button class="btn ghost" id="shareBtn" data-icon="pin">Konumu paylaş</button>
+        <button class="btn ghost" id="printBtn" data-icon="printer">Yazdır</button>
+      </div>
+      <div class="save zero" id="gpsInfo" style="margin-top:10px" hidden>Konum bekleniyor…</div>
+    </div>
+
+    <div id="rerouteBox"></div>
+    <div id="stopList"></div>
+  </section>
+
+  <section id="emptyView" class="card" hidden>
+    <b id="emptyTitle">Rota bulunamadı</b>
+    <p class="hint" id="emptyText" style="margin-top:8px"></p>
+    <a class="btn ghost" href="index.html" style="margin-top:12px">Ana sayfaya dön</a>
+  </section>
+</main>
+
+<div id="printArea"></div>
+<div id="toast"></div>
+
+<!-- delivery sheet -->
+<div class="modal" id="deliverySheet" hidden>
+  <div class="modal-back" data-close></div>
+  <div class="modal-card sheet">
+    <button class="modal-x" data-close aria-label="Kapat"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+    <h2 id="dsTitle">Teslimat</h2>
+    <p class="modal-sub" id="dsAddr"></p>
+
+    <div class="seg wide" id="dsStatus">
+      <button type="button" data-s="delivered" class="on">Teslim edildi</button>
+      <button type="button" data-s="failed">Teslim edilemedi</button>
+    </div>
+
+    <div class="field" id="dsReasonField" hidden style="margin-top:12px">
+      <label class="lbl">Sebep</label>
+      <select class="inp" id="dsReason"></select>
+    </div>
+
+    <div class="field" style="margin-top:12px">
+      <label class="lbl">Not (isteğe bağlı)</label>
+      <input class="inp" id="dsNote" placeholder="Örn. komşuya bırakıldı">
+    </div>
+
+    <div class="field">
+      <label class="lbl">Fotoğraf (isteğe bağlı)</label>
+      <input type="file" id="dsPhoto" accept="image/*" capture="environment" hidden>
+      <button class="btn ghost" id="dsPhotoBtn" data-icon="camera">Fotoğraf ekle</button>
+      <div id="dsPhotoPrev"></div>
+    </div>
+
+    <div class="authmsg" id="dsMsg" hidden></div>
+    <button class="btn primary" id="dsSave">Kaydet</button>
+    <button class="btn ghost" id="dsClear" style="margin-top:8px" hidden>Kaydı geri al</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/icons.js?v=35"></script>
+<script src="js/firebase-config.js?v=35"></script>
+<script src="js/storage.js?v=35"></script>
+<script src="js/auth.js?v=35"></script>
+<script src="js/auth-ui.js?v=35"></script>
+<script src="js/geo.js?v=35"></script>
+<script src="js/routing.js?v=35"></script>
+<script src="js/reroute.js?v=35"></script>
+<script src="js/delivery.js?v=35"></script>
+<script src="js/pdf.js?v=35"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- shell ---------- */
+var themeBtn = document.getElementById('themeBtn');
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.innerHTML = RP.icons.svg(t === 'light' ? 'sun' : 'moon');
+  localStorage.setItem('rp_theme', t);
+}
+applyTheme(localStorage.getItem('rp_theme') || 'dark');
+themeBtn.addEventListener('click', function(){
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+});
+
+var toastEl = document.getElementById('toast'), toastT;
+function toast(msg, isErr){
+  toastEl.textContent = msg;
+  toastEl.className = 'on' + (isErr ? ' err' : '');
+  clearTimeout(toastT);
+  toastT = setTimeout(function(){ toastEl.className = ''; }, 3600);
+}
+function fmtKm(m){ return (Number(m||0)/1000).toFixed(1).replace('.', ',') + ' km'; }
+function fmtDur(sec){
+  var h = Math.floor(Number(sec||0)/3600), m = Math.round((Number(sec||0)%3600)/60);
+  return h > 0 ? (h + ' sa ' + m + ' dk') : (m + ' dk');
+}
+/* A stored photo is a data: URL from Firestore. It is user-supplied, so it is
+   both escaped and format-checked before it ever reaches an img src. */
+function safePhoto(v){
+  var str = String(v == null ? '' : v);
+  return /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(str) ? str : '';
+}
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function show(id){
+  ['listView','routeView','emptyView'].forEach(function(v){
+    document.getElementById(v).hidden = (v !== id);
+  });
+}
+
+/* Static buttons declare their icon in markup; fill them in once at boot. */
+document.querySelectorAll('[data-icon]').forEach(function(b){
+  b.innerHTML = RP.icons.svg(b.dataset.icon) + b.textContent.trim();
+});
+
+/* ---------- state ---------- */
+var routeId = new URLSearchParams(location.search).get('route');
+var route = null;
+var deliveries = {};
+var unsubDeliveries = null;
+var watchId = null, lastSend = 0;
+var currentStop = null;
+var pendingPhoto = null;
+
+RP.storage.adoptConfigFromHash();
+if(RP.auth.available()) RP.auth.start();
+
+RP.authUI.mountHeader(document.getElementById('authSlot'), {
+  onUnavailable: function(){ toast('Bu link eksik görünüyor — planlayıcıdan tam linki iste', true); }
+});
+
+/* A persisted session resolves after the first paint, so the screen has to be
+   rebuilt when it arrives — otherwise a signed-in driver keeps seeing the
+   "please sign in" panel until they reload by hand. */
+var lastSignedIn = null;
+if(RP.auth.available()){
+  RP.auth.onChange(function(){
+    var now = RP.auth.isSignedIn();
+    if(now === lastSignedIn) return;
+    lastSignedIn = now;
+    boot();
+  });
+}
+
+/* ---------- boot ---------- */
+var routeOpened = false;
+function boot(){
+  // a route link is self-contained; don't reload it every time auth settles
+  if(routeId){
+    if(routeOpened) return;
+    routeOpened = true;
+    return openRoute(routeId);
+  }
+
+  if(!RP.auth.available()){
+    show('emptyView');
+    document.getElementById('emptyTitle').textContent = 'Rota linki gerekli';
+    document.getElementById('emptyText').textContent =
+      'Planlama ekranından üretilen şoför linkini aç, ya da hesabınla giriş yaparak sana atanan rotaları gör.';
+    return;
+  }
+  if(!RP.auth.isSignedIn()){
+    show('emptyView');
+    document.getElementById('emptyTitle').textContent = 'Giriş yap';
+    document.getElementById('emptyText').textContent =
+      'Sana atanan rotaları görmek için şoför hesabınla giriş yap. Elinde bir şoför linki varsa doğrudan onu da açabilirsin.';
+    return;
+  }
+  loadMyRoutes();
+}
+
+function loadMyRoutes(){
+  show('listView');
+  var listEl = document.getElementById('routeList');
+  listEl.innerHTML = '<p class="hint">Yükleniyor…</p>';
+  var email = (RP.auth.user() || {}).email || '';
+  RP.storage.listDriverRoutes(email).then(function(rows){
+    if(!rows.length){
+      listEl.innerHTML = '<p class="hint">Sana atanmış rota yok. Planlayıcı e-postanı (' +
+        esc(email) + ') rotaya eklediğinde burada görünür.</p>';
+      return;
+    }
+    listEl.innerHTML = rows.map(function(r){
+      var d = new Date(r.createdAt || Date.now());
+      return '<button class="routerow" data-id="' + esc(r.id) + '">' +
+        '<div><b>' + d.toLocaleDateString('tr-TR') + ' · ' + countStops(r) + ' durak</b>' +
+        '<small>' + esc((r.start && r.start.label) || 'Başlangıç') + '</small></div>' +
+        '<span>›</span></button>';
+    }).join('');
+    listEl.querySelectorAll('[data-id]').forEach(function(b){
+      b.addEventListener('click', function(){ openRoute(this.dataset.id); });
+    });
+  }).catch(function(err){
+    listEl.innerHTML = '<p class="hint">Rotalar yüklenemedi: ' + esc(err.message) + '</p>';
+  });
+}
+
+function countStops(r){
+  var n = 0;
+  (r.vehicles || []).forEach(function(v){
+    (v.steps || []).forEach(function(s){ if(s.kind === 'stop') n++; });
+  });
+  return n;
+}
+
+function openRoute(id){
+  routeId = id;
+  show('routeView');
+  document.getElementById('stopList').innerHTML = '<p class="hint">Rota yükleniyor…</p>';
+  RP.storage.loadRoute(id).then(function(r){
+    route = r;
+    // the plan already knows where the jams are; that drives the re-route trigger
+    RP.reroute.setJams((r.vehicles || []).reduce(function(acc, v){
+      return acc.concat(v.trafficSections || []);
+    }, []));
+    renderRoute();
+    if(unsubDeliveries) unsubDeliveries();
+    unsubDeliveries = RP.storage.subscribeDeliveries(id, function(map){
+      deliveries = map;
+      renderRoute();
+    });
+  }).catch(function(err){
+    show('emptyView');
+    document.getElementById('emptyTitle').textContent = 'Rota açılamadı';
+    document.getElementById('emptyText').textContent = err.message;
+  });
+}
+
+/* ---------- rendering ---------- */
+function allSteps(){
+  var out = [];
+  (route.vehicles || []).forEach(function(v){
+    (v.steps || []).forEach(function(s){ out.push(s); });
+  });
+  return out;
+}
+
+function renderRoute(){
+  if(!route) return;
+  var steps = allSteps();
+  var sum = RP.delivery.summarize(steps, deliveries);
+
+  document.getElementById('routeTitle').textContent =
+    new Date(route.createdAt || Date.now()).toLocaleDateString('tr-TR') + ' rotası';
+  document.getElementById('routeMeta').textContent =
+    fmtKm(route.totalDistance) + ' · ' + fmtDur(route.totalDuration);
+  var pill = document.getElementById('progPill');
+  pill.textContent = sum.done + '/' + sum.total;
+  pill.className = 'pill ' + (sum.total && sum.done === sum.total ? 'on' : 'off');
+  document.getElementById('progFill').style.width = sum.percent + '%';
+
+  // the first stop with no delivery record yet is "next"
+  var nextId = null;
+  steps.forEach(function(s){
+    if(s.kind === 'stop' && !nextId && !deliveries[s.stopId]) nextId = s.stopId;
+  });
+
+  var list = document.getElementById('stopList');
+  list.innerHTML = steps.map(function(s){ return stopCard(s, s.stopId === nextId); }).join('');
+  list.querySelectorAll('[data-mark]').forEach(function(b){
+    b.addEventListener('click', function(){ openSheet(this.dataset.mark); });
+  });
+}
+
+function stopCard(s, isNext){
+  var d = deliveries[s.stopId];
+  var isStop = s.kind === 'stop';
+  var num = s.kind === 'start' ? 'B' : (s.kind === 'end' ? 'V' : String(s.stopNo || ''));
+  var cls = s.kind === 'start' ? 's' : (s.kind === 'end' ? 'e' : '');
+  var nav = RP.delivery.navLinks(s.lat, s.lon, s.label);
+  var wa = s.phone ? RP.delivery.whatsappLink(s.phone,
+        'Merhaba, kargonuz yolda. Tahmini varış: ' + (RP.pdf.fmtClock(s.eta) || 'kısa süre içinde')) : null;
+
+  var statusHtml = '';
+  if(isStop && d){
+    statusHtml = '<div class="dstatus ' + RP.delivery.statusClass(d.status) + '">' +
+      (d.status === 'delivered' ? RP.icons.svg('check','ok') : RP.icons.svg('warn','bad')) +
+      RP.delivery.statusLabel(d.status) +
+      (d.reason ? ' — ' + esc(d.reason) : '') +
+      (d.note ? '<small>' + esc(d.note) + '</small>' : '') +
+      (safePhoto(d.photo) ? '<img class="dphoto" src="' + esc(safePhoto(d.photo)) + '" alt="Teslimat fotoğrafı">' : '') +
+      '</div>';
+  }
+
+  return '<article class="stopcard' + (isNext ? ' next' : '') + (d ? ' done' : '') + '">' +
+    (isNext ? '<span class="nextflag">SIRADAKİ</span>' : '') +
+    '<div class="scHead">' +
+      '<div class="num ' + cls + '">' + esc(num) + '</div>' +
+      '<div class="scText">' +
+        '<b>' + (s.kind === 'start' ? 'Başlangıç' : s.kind === 'end' ? 'Varış' : 'Durak ' + (s.stopNo || '')) + '</b>' +
+        '<small>' + esc(s.label) + '</small>' +
+        (s.eta != null ? '<span class="eta">' + RP.icons.svg('clock') + RP.pdf.fmtClock(s.eta) + '</span>' : '') +
+        (s.load ? '<span class="eta">' + RP.icons.svg('box') + s.load + '</span>' : '') +
+      '</div>' +
+    '</div>' +
+    statusHtml +
+    '<div class="scActions">' +
+      '<a class="btn ghost" href="' + nav.google + '" target="_blank" rel="noopener">' + RP.icons.svg('map') + 'Maps</a>' +
+      '<a class="btn ghost" href="' + nav.yandex + '" target="_blank" rel="noopener">' + RP.icons.svg('compass') + 'Yandex</a>' +
+      (wa ? '<a class="btn ghost" href="' + wa + '" target="_blank" rel="noopener">' + RP.icons.svg('chat') + 'WhatsApp</a>' : '') +
+      (isStop ? '<button class="btn ' + (d ? 'ghost' : 'primary') + '" data-mark="' + esc(s.stopId) + '">' +
+        (d ? RP.icons.svg('edit') + 'Güncelle' : RP.icons.svg('check') + 'İşaretle') + '</button>' : '') +
+    '</div>' +
+  '</article>';
+}
+
+/* ---------- delivery sheet ---------- */
+var sheet = document.getElementById('deliverySheet');
+var dsReason = document.getElementById('dsReason');
+dsReason.innerHTML = RP.delivery.FAIL_REASONS.map(function(r){
+  return '<option value="' + esc(r) + '">' + esc(r) + '</option>';
+}).join('');
+
+sheet.querySelectorAll('[data-close]').forEach(function(b){
+  b.addEventListener('click', closeSheet);
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && !sheet.hidden) closeSheet();
+});
+
+document.getElementById('dsStatus').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-s]');
+  if(!b) return;
+  this.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+  b.classList.add('on');
+  document.getElementById('dsReasonField').hidden = b.dataset.s !== 'failed';
+});
+
+document.getElementById('dsPhotoBtn').addEventListener('click', function(){
+  document.getElementById('dsPhoto').click();
+});
+document.getElementById('dsPhoto').addEventListener('change', function(){
+  var f = this.files && this.files[0];
+  if(!f) return;
+  dsMessage('Fotoğraf işleniyor…');
+  RP.delivery.compressPhoto(f).then(function(img){
+    pendingPhoto = img.dataUrl;
+    document.getElementById('dsPhotoPrev').innerHTML =
+      '<img class="dphoto" src="' + img.dataUrl + '" alt="Önizleme">' +
+      '<button class="linkbtn" id="dsPhotoDel">Fotoğrafı kaldır</button>';
+    document.getElementById('dsPhotoDel').addEventListener('click', function(){
+      pendingPhoto = null;
+      document.getElementById('dsPhotoPrev').innerHTML = '';
+    });
+    dsMessage('');
+  }).catch(function(err){
+    dsMessage('Fotoğraf eklenemedi: ' + err.message, 'err');
+  });
+});
+
+function dsMessage(text, kind){
+  var m = document.getElementById('dsMsg');
+  m.textContent = text || '';
+  m.hidden = !text;
+  m.className = 'authmsg' + (kind ? ' ' + kind : (text ? ' ok' : ''));
+}
+
+function openSheet(stopId){
+  var step = allSteps().filter(function(s){ return s.stopId === stopId; })[0];
+  if(!step) return;
+  currentStop = step;
+  pendingPhoto = null;
+
+  var existing = deliveries[stopId];
+  document.getElementById('dsTitle').textContent = 'Durak ' + (step.stopNo || '');
+  document.getElementById('dsAddr').textContent = step.label || '';
+  document.getElementById('dsNote').value = existing ? (existing.note || '') : '';
+  var saved = existing ? safePhoto(existing.photo) : '';
+  document.getElementById('dsPhotoPrev').innerHTML = saved
+    ? '<img class="dphoto" src="' + esc(saved) + '" alt="Kayıtlı fotoğraf">' : '';
+  if(saved) pendingPhoto = saved;
+
+  var status = existing ? existing.status : 'delivered';
+  document.getElementById('dsStatus').querySelectorAll('button').forEach(function(b){
+    b.classList.toggle('on', b.dataset.s === status);
+  });
+  document.getElementById('dsReasonField').hidden = status !== 'failed';
+  if(existing && existing.reason) dsReason.value = existing.reason;
+  document.getElementById('dsClear').hidden = !existing;
+  dsMessage('');
+  sheet.hidden = false;
+}
+
+function closeSheet(){
+  sheet.hidden = true;
+  currentStop = null;
+  pendingPhoto = null;
+  document.getElementById('dsPhotoPrev').innerHTML = '';
+  document.getElementById('dsPhoto').value = '';
+}
+
+document.getElementById('dsSave').addEventListener('click', function(){
+  if(!currentStop) return;
+  var btn = this;
+  var status = document.getElementById('dsStatus').querySelector('button.on').dataset.s;
+  var payload = {
+    status: status,
+    note: document.getElementById('dsNote').value.trim(),
+    reason: status === 'failed' ? dsReason.value : '',
+    stopNo: currentStop.stopNo || null,
+    label: currentStop.label || ''
+  };
+  if(pendingPhoto) payload.photo = pendingPhoto;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Kaydediliyor…';
+  RP.storage.setDelivery(routeId, currentStop.stopId, payload).then(function(){
+    btn.disabled = false; btn.textContent = 'Kaydet';
+    closeSheet();
+    toast(status === 'delivered' ? 'Teslim edildi olarak işaretlendi' : 'Teslim edilemedi olarak kaydedildi');
+  }).catch(function(err){
+    btn.disabled = false; btn.textContent = 'Kaydet';
+    dsMessage('Kaydedilemedi: ' + err.message, 'err');
+  });
+});
+
+document.getElementById('dsClear').addEventListener('click', function(){
+  if(!currentStop) return;
+  RP.storage.clearDelivery(routeId, currentStop.stopId).then(function(){
+    closeSheet();
+    toast('Kayıt geri alındı');
+  }).catch(function(err){
+    dsMessage('Geri alınamadı: ' + err.message, 'err');
+  });
+});
+
+
+/* ---------- live re-routing ---------- */
+/* Scans are deliberately rare — see js/reroute.js for the trigger rules that
+   keep the free TomTom quota intact. */
+var rerouteBusy = false;
+
+function nextPendingStop(){
+  var steps = route ? allSteps() : [];
+  for(var i = 0; i < steps.length; i++){
+    if(steps[i].kind === 'stop' && !deliveries[steps[i].stopId]) return steps[i];
+  }
+  return null;
+}
+
+/* What the plan says the DRIVE to this stop takes.
+
+   The earlier version used "clock time until the planned ETA", which is a
+   different quantity: a driver running 90 minutes early would see the remaining
+   schedule slack (5400 s) compared against a 900 s drive and be told a road they
+   are already on saves an hour. It also disabled re-routing entirely once the
+   driver fell behind — exactly when it matters. */
+function plannedSecondsTo(stop){
+  if(!stop) return 0;
+  var steps = allSteps();
+  var idx = steps.indexOf(stop);
+  if(idx > 0){
+    var prev = steps[idx - 1];
+    if(prev && prev.eta != null && stop.eta != null && stop.eta > prev.eta){
+      // planned leg time, minus the fixed service allowance baked into the ETAs
+      var legMin = (stop.eta - prev.eta) - 5;
+      if(legMin > 1) return legMin * 60;
+    }
+  }
+  return 0;
+}
+
+function considerReroute(){
+  if(rerouteBusy || !route) return;
+  var stop = nextPendingStop();
+  if(!stop) return;
+
+  var verdict = RP.reroute.decide(stop);
+  if(!verdict.ok) return;
+
+  var planned = plannedSecondsTo(stop);
+  if(planned <= 0) return;   // already late; a "gain" would be meaningless
+
+  rerouteBusy = true;
+  RP.reroute.scan(stop, planned, verdict.jam).then(function(res){
+    rerouteBusy = false;
+    if(!res || !res.better) return;
+    showReroute(res, stop, verdict.why);
+  }).catch(function(){ rerouteBusy = false; });
+}
+
+function showReroute(res, stop, why){
+  var box = document.getElementById('rerouteBox');
+  var nav = RP.delivery.navLinks(stop.lat, stop.lon, stop.label);
+  box.innerHTML =
+    '<div class="card rr">' +
+      '<div class="rrhead">' + RP.icons.svg('traffic','warn') +
+        '<b>Daha hızlı yol bulundu</b>' +
+        '<span class="pill on">' + fmtDur(res.gainSeconds) + ' kazanç</span>' +
+      '</div>' +
+      '<p class="hint" style="margin:8px 0 0">' +
+        esc(stop.label) + ' için yeni tahmini süre <b>' + fmtDur(res.newDuration) + '</b>' +
+        (res.jamDelay ? ' · önündeki trafik ' + fmtDur(res.jamDelay) + ' gecikme yaratıyor' : '') +
+        '<br><small>Sebep: ' + esc(why) + '</small>' +
+      '</p>' +
+      '<div class="btnrow" style="margin-top:12px">' +
+        '<a class="btn primary" href="' + nav.google + '" target="_blank" rel="noopener">' +
+          RP.icons.svg('map') + 'Yeni yolu aç</a>' +
+        '<button class="btn ghost" id="rrDismiss">Yoksay</button>' +
+      '</div>' +
+    '</div>';
+
+  document.getElementById('rrDismiss').addEventListener('click', function(){
+    RP.reroute.dismiss();
+    box.innerHTML = '';
+  });
+}
+
+/* ---------- location sharing ---------- */
+document.getElementById('shareBtn').addEventListener('click', function(){
+  var btn = this;
+  if(watchId != null){
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    btn.innerHTML = RP.icons.svg('pin') + 'Konumu paylaş';
+    document.getElementById('gpsInfo').hidden = true;
+    document.getElementById('rerouteBox').innerHTML = '';
+    RP.reroute.reset();
+    toast('Konum paylaşımı durduruldu');
+    return;
+  }
+  if(!navigator.geolocation){ toast('Tarayıcı konum desteklemiyor', true); return; }
+
+  btn.innerHTML = '<span class="spin"></span>İzin bekleniyor…';
+  RP.reroute.reset();
+  watchId = navigator.geolocation.watchPosition(function(pos){
+    btn.innerHTML = RP.icons.svg('stop') + 'Paylaşımı durdur';
+    var info = document.getElementById('gpsInfo');
+    info.hidden = false;
+    var lat = pos.coords.latitude, lon = pos.coords.longitude;
+    info.textContent = '' + lat.toFixed(5) + ', ' + lon.toFixed(5) +
+      ' (±' + Math.round(pos.coords.accuracy) + ' m)';
+
+    RP.reroute.pushPosition(pos);
+    considerReroute();
+
+    // one write every 10s is plenty for tracking and keeps Firestore usage low
+    if(Date.now() - lastSend < 10000) return;
+    lastSend = Date.now();
+    RP.storage.updateDriverLocation(routeId, lat, lon).catch(function(err){
+      toast('Konum gönderilemedi: ' + err.message, true);
+    });
+  }, function(err){
+    btn.innerHTML = RP.icons.svg('pin') + 'Konumu paylaş';
+    watchId = null;
+    toast('Konum alınamadı: ' + err.message, true);
+  }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+});
+
+document.getElementById('printBtn').addEventListener('click', function(){
+  if(!route) return;
+  /* The stored route has raw numbers; the print sheet expects preformatted
+     per-vehicle text, so it is built here rather than shipped in the document. */
+  var printable = {
+    vehicles: (route.vehicles || []).map(function(v){
+      return {
+        steps: v.steps || [],
+        distanceText: fmtKm(v.distance),
+        durationText: fmtDur(v.duration),
+        load: v.load
+      };
+    })
+  };
+  RP.pdf.build(printable, {
+    date: new Date(route.createdAt || Date.now()).toLocaleDateString('tr-TR'),
+    startTime: RP.pdf.fmtClock((route.options || {}).startTime) || '',
+    totalDistance: fmtKm(route.totalDistance),
+    totalDuration: fmtDur(route.totalDuration)
+  });
+  window.print();
+});
+
+window.addEventListener('beforeunload', function(){
+  if(unsubDeliveries) unsubDeliveries();
+  if(watchId != null) navigator.geolocation.clearWatch(watchId);
+});
+
+boot();
+})();
+</script>
+</body>
+</html>

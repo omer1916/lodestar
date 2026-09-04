@@ -1,0 +1,35 @@
+{
+  "_comment": [
+    "Firestore, where() ve orderBy() farklı alanlarda olduğunda bileşik indeks ister.",
+    "Bu indeksler olmadan da uygulama çalışır (istemci tarafında sıralar) ama geçmiş",
+    "listesi büyüdükçe sıralama doğruluğu için indeksleri oluşturmak gerekir.",
+    "",
+    "Oluşturma yolları:",
+    "  1) En kolayı: uygulamayı kullanırken tarayıcı konsolunda çıkan",
+    "     'You can create it here: https://console.firebase.google.com/...' linkine tıklayın.",
+    "  2) Ya da Firebase konsolu > Firestore Database > Indexes > Add index",
+    "     bölümünden aşağıdaki iki indeksi elle girin.",
+    "  3) Ya da Firebase CLI ile: firebase deploy --only firestore:indexes"
+  ],
+  "indexes": [
+    {
+      "_use": "Planlayıcının kendi geçmiş rotaları (js/storage.js listHistory)",
+      "collectionGroup": "routes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "owner", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "_use": "Şoföre atanan rotalar (js/storage.js listDriverRoutes)",
+      "collectionGroup": "routes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "driverEmail", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
