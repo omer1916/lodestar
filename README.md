@@ -111,49 +111,6 @@ kopyalayınca çalışır.
 
 ---
 
-## Çalıştırma
-
-```bash
-git clone https://github.com/omer1916/rotaplan.git
-cd rotaplan
-python -m http.server 8080
-```
-
-Sonra `http://localhost:8080` adresini aç.
-
-> **Not:** Bir dosyayı değiştirip yayına aldığında HTML'lerdeki `?v=35` sürüm numarasını
-> artır, yoksa ziyaretçilerin tarayıcısı eski dosyayı önbellekten sunabilir.
-
-### Kendi Firebase projenle kurmak
-
-Depodaki `js/firebase-config.js` bir Firebase projesine bağlıdır. Kendi projenle
-çalıştırmak istersen:
-
-1. [Firebase konsolunda](https://console.firebase.google.com/) proje oluştur
-2. **Security → Authentication → Get started**, ardından *Sign-in method* sekmesinden
-   **Email/Password** ve **Anonymous**'ı etkinleştir
-3. **Databases & Storage → Firestore Database → Create database** (bölge: `eur3`)
-4. **Project settings → General → Your apps** bölümünden web uygulaması ekle, çıkan
-   `firebaseConfig` değerlerini `js/firebase-config.js` dosyasına yaz
-5. **Firestore Database → Rules** sekmesine [`firestore.rules`](firestore.rules)
-   içeriğini yapıştır ve **Publish** de
-6. Yayına aldığın alan adını **Authentication → Settings → Authorized domains**'e ekle
-7. İsteğe bağlı: [`firestore.indexes.json`](firestore.indexes.json) içindeki iki indeksi
-   oluştur (indekssiz de çalışır, geçmiş listesi büyüdüğünde sıralama için gerekir)
-
-Firebase web config'i **gizli anahtar değildir** — projeyi tanımlar, yetki vermez.
-Erişimi güvenlik kuralları belirler. Bu yüzden depoda durması normaldir ve Firebase'in
-kendi dokümantasyonu da böyle önerir.
-
-### Canlı trafik (isteğe bağlı)
-
-[developer.tomtom.com](https://developer.tomtom.com/user/register) üzerinden ücretsiz
-anahtar al (günde 2.500 istek, kredi kartı istemez), uygulamada *Ayarlar → TomTom API Key*
-alanına yapıştır. Gereken API'ler: Routing, Traffic, Matrix Routing v2, Geocoding,
-Reverse Geocoding. Anahtar yalnızca kullanıcının tarayıcısında saklanır.
-
----
-
 ## Güvenlik
 
 Firestore güvenlik kuralları [`firestore.rules`](firestore.rules) dosyasında ve
