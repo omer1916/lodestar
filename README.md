@@ -171,6 +171,7 @@ Yedek tetikleyici anlık hıza değil **5 dakikada kat edilen yola** bakar — b
 | Barkod | BarcodeDetector API + jsQR (yedek) |
 | Backend | Firebase Firestore + Firebase Auth |
 | PWA | Web App Manifest + Service Worker |
+| Ziyaretçi sayımı | GoatCounter — çerezsiz, kişisel veri toplamaz. `js/analytics.js` içinde site kodu boşken hiçbir istek gitmez |
 
 **Build aracı, paket yöneticisi, derleme adımı yok.** Statik dosyalar; herhangi bir yere
 kopyalayınca çalışır.

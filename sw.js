@@ -1,6 +1,6 @@
 /* App-shell caching only. Routing, geocoding and Firebase calls always go to the
    network — offline the UI opens but new routes cannot be calculated. */
-var CACHE = 'lodestar-v26';
+var CACHE = 'lodestar-v27';
 var SHELL = [
   'index.html',
   'app.html',
@@ -12,6 +12,7 @@ var SHELL = [
   'js/icons.js',
   'js/mode.js',
   'js/upload.js',
+  'js/analytics.js',
   'js/geo.js',
   'js/optimize.js',
   'js/routing.js',
