@@ -12,7 +12,7 @@ window.RP = window.RP || {};
 (function(){
   "use strict";
 
-  var SITE_CODE = '';          // örn. 'lodestar'  ->  lodestar.goatcounter.com
+  var SITE_CODE = 'omerdastan';   // panel: https://omerdastan.goatcounter.com
 
   if(!SITE_CODE) return;
 
