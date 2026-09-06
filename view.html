@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="icon" href="favicon.svg?v=1" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/style.css?v=47">
+<link rel="stylesheet" href="css/style.css?v=48">
 </head>
 <body>
 <div class="app">
@@ -32,11 +32,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="js/icons.js?v=47"></script>
-<script src="js/firebase-config.js?v=47"></script>
-<script src="js/storage.js?v=47"></script>
-<script src="js/delivery.js?v=47"></script>
-<script src="js/pdf.js?v=47"></script>
+<script src="js/icons.js?v=48"></script>
+<script src="js/firebase-config.js?v=48"></script>
+<script src="js/storage.js?v=48"></script>
+<script src="js/delivery.js?v=48"></script>
+<script src="js/pdf.js?v=48"></script>
 <script>
 (function(){
 "use strict";
@@ -54,9 +54,17 @@ themeBtn.addEventListener('click', function(){
 
 /* Colours come from the stored route, so they are validated rather than trusted:
    anything that is not a plain hex colour is replaced with the default. */
-/* stopId comes from the stored route, so it is not trusted to be selector-safe:
-   one unescaped quote would throw and silently kill every delivery tag below. */
-function selAttr(v){ return String(v == null ? '' : v).replace(/["\]/g, '\$&'); }
+/* stopId comes from the stored route, so it is not trusted to be selector-safe.
+   Comparing attribute values means never building a selector out of it: a quote
+   inside a stopId used to throw and silently kill every delivery tag below. */
+function tagFor(stopId){
+  var want = String(stopId == null ? '' : stopId);
+  var rows = document.querySelectorAll('li[data-stop]');
+  for(var i = 0; i < rows.length; i++){
+    if(rows[i].getAttribute('data-stop') === want) return rows[i].querySelector('.dtag');
+  }
+  return null;
+}
 function safeColor(c){
   return /^#[0-9a-fA-F]{3,8}$/.test(String(c || '')) ? String(c) : '#3b82f6';
 }
@@ -209,7 +217,7 @@ function subscribeDeliveryStatus(id){
           sum.failed + ' başarısız · ' + sum.pending + ' bekliyor</p>';
     }
     steps.forEach(function(s){
-      var li = document.querySelector('li[data-stop="' + selAttr(s.stopId) + '"] .dtag');
+      var li = tagFor(s.stopId);
       if(!li) return;
       var d = map[s.stopId];
       if(!d){ li.hidden = true; return; }
