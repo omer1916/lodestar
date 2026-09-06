@@ -476,6 +476,34 @@ document.getElementById('metric').addEventListener('click', function(e){
   b.classList.add('on');
 });
 
+/* Toll preference is a standing habit rather than a per-route decision, so it is
+   remembered. Bridge and motorway fees are a real cost here: the Osmangazi and
+   Yavuz Sultan Selim crossings alone can outweigh the fuel saved by a shortcut. */
+(function(){
+  var seg = document.getElementById('tollSeg');
+  if(!seg) return;
+  var KEY = 'rp_avoid_tolls';
+
+  function apply(mode){
+    seg.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('on', b.dataset.toll === mode);
+    });
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch(e){}
+  apply(saved === '1' ? 'avoid' : 'use');
+
+  seg.addEventListener('click', function(e){
+    var b = e.target.closest('button[data-toll]');
+    if(!b) return;
+    apply(b.dataset.toll);
+    try { localStorage.setItem(KEY, b.dataset.toll === 'avoid' ? '1' : '0'); } catch(err){}
+    if(b.dataset.toll === 'avoid' && !RP.routing.canAvoidTolls()){
+      toast('Ücretli yollardan kaçınmak TomTom anahtarı gerektiriyor', true);
+    }
+  });
+})();
+
 /* ---------- settings ---------- */
 var ttKeyInp = document.getElementById('ttKeyInp');
 var ttStatus = document.getElementById('ttStatus');
@@ -1095,10 +1123,12 @@ function refreshStopDetailTitles(){
 
 function readOptions(){
   var metricBtn = document.querySelector('#metric button.on');
+  var tollBtn = document.querySelector('#tollSeg button.on');
   var solo = RP.mode.isPersonal();
   return {
     endMode: document.getElementById('endMode').value,
     metric: metricBtn ? metricBtn.dataset.m : 'distance',
+    avoidTolls: tollBtn ? tollBtn.dataset.toll === 'avoid' : false,
     // personal mode hides these; reading them anyway would let a vehicle count left
     // over from work mode silently split a private trip across imaginary vehicles
     vehicleCount: solo ? 1 : Math.min(6, Math.max(1, parseInt(document.getElementById('vehicleCount').value,10) || 1)),
@@ -1175,7 +1205,7 @@ function planOneVehicle(groupStops, opt, vehicleIndex){
     return (i === 0 || (lockEnd && i === fixedEndIdx)) ? null : groupStops[i-1];
   });
 
-  return RP.routing.roadMatrix(points, opt.metric).then(function(mx){
+  return RP.routing.roadMatrix(points, opt.metric, opt.avoidTolls).then(function(mx){
     // "Süre" orders by travel minutes, "Mesafe" by kilometres
     var costMatrix = opt.metric === 'duration' ? mx.dur : mx.dist;
 
@@ -1221,7 +1251,7 @@ function planOneVehicle(groupStops, opt, vehicleIndex){
 
     return RP.routing.computeRoute(seq, function(){
       toast('TomTom yanıt vermedi, OSRM ile hesaplanıyor', true);
-    }, opt.metric).then(function(route){
+    }, opt.metric, opt.avoidTolls).then(function(route){
       return buildVehicle(seq, route, opt, vehicleIndex, mx.real, null, naiveCost, optimisedCost);
     }).catch(function(err){
       console.error(err);
@@ -1396,6 +1426,16 @@ function renderResult(result){
     badge = '<div class="save zero">Trafiksiz tahmindir (OSRM). Canlı trafik için TomTom key ekle.</div>';
   }
 
+  /* OSRM has no avoid parameter, so the request went out without it. Saying so is
+     the difference between a setting and a promise the app cannot keep. */
+  var tollBadge = (result.options.avoidTolls && (noRoad || !anyTraffic))
+    ? '<div class="save warn">' + RP.icons.svg('warn') +
+      'Ücretli yollardan kaçınılamadı — ücretsiz OSRM bunu desteklemiyor. ' +
+      'TomTom anahtarı eklersen rota ücretli yolları atlar.</div>'
+    : (result.options.avoidTolls
+        ? '<div class="save">' + RP.icons.svg('check','ok') + 'Ücretli yollardan kaçınıldı.</div>'
+        : '');
+
   var save = savingsBlock(result);
   var savingsBadge = save
     ? '<div class="save">' + RP.icons.svg('trend') + 'Optimize sıralama <b>%' + save.percent + '</b> daha kısa — ' +
@@ -1449,7 +1489,7 @@ function renderResult(result){
       '<div class="stats">' +
         '<div class="stat"><b>' + fmtKm(result.totalDistance) + '</b><span>Toplam mesafe</span></div>' +
         '<div class="stat"><b>' + fmtDur(result.totalDuration) + '</b><span>Toplam süre</span></div>' +
-      '</div>' + badge + jamBadge + savingsBadge + costBadge + overflowBadge + lateBadge +
+      '</div>' + badge + tollBadge + jamBadge + savingsBadge + costBadge + overflowBadge + lateBadge +
       '<div class="btnrow" style="margin-top:10px">' +
         '<button class="btn ghost" id="printBtn">' + RP.icons.svg('printer') + 'Yazdır / PDF</button>' +
         '<button class="btn ghost" id="saveBtn">' + RP.icons.svg('cloud') + 'Kaydet &amp; paylaş</button>' +
@@ -1779,6 +1819,12 @@ function restoreRoute(id){
       var wanted = o.metric === 'duration' ? 'duration' : 'distance';
       document.querySelectorAll('#metric button').forEach(function(b){
         b.classList.toggle('on', b.dataset.m === wanted);
+      });
+
+      // so does the toll preference: it changes which roads the order was built on
+      var toll = o.avoidTolls ? 'avoid' : 'use';
+      document.querySelectorAll('#tollSeg button').forEach(function(b){
+        b.classList.toggle('on', b.dataset.toll === toll);
       });
     }
     renumber();

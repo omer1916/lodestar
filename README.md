@@ -101,6 +101,10 @@ açılır; iki ekran birbirine linkli, hiçbiri çıkmaz sokak değil.
 - **Yoğunluk haritada renklenir** — sarı (hafif), turuncu (orta), kırmızı (yoğun),
   koyu kırmızı (durma/kapalı). Tıklayınca gecikme ve ortalama hız görünür
 - "Mesafe" seçilirse en kısa yol, "Süre" seçilirse en hızlı yol istenir
+- **Ücretli yollardan kaçınma** — köprü ve otoyol geçişleri atlanır. Hem sıralama
+  matrisine hem çizilen rotaya uygulanır, yoksa sıra kullanılmayacak yollara göre
+  kurulurdu. TomTom anahtarı gerektirir; ücretsiz OSRM'de böyle bir parametre yok
+  ve uygulama bunu sessizce geçmek yerine sonuç ekranında söyler
 - Anahtar yoksa ücretsiz OSRM ile trafiksiz gerçek yol rotası çizilir
 
 ### Canlı yeniden rotalama

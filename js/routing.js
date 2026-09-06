@@ -28,12 +28,18 @@ RP.routing = (function(){
      always on: it changes both the chosen roads and the reported travel time. */
   function routeTypeFor(metric){ return metric === 'distance' ? 'shortest' : 'fastest'; }
 
-  function tomtomRoute(pts, metric){
+  /* Toll avoidance is a TomTom feature. The free OSRM fallback has no equivalent
+     parameter, so a route computed there silently keeps the toll roads — the UI
+     says so rather than letting the setting look honoured when it is not. */
+  function avoidParam(avoidTolls){ return avoidTolls ? '&avoid=tollRoads' : ''; }
+
+  function tomtomRoute(pts, metric, avoidTolls){
     var locStr = pts.map(function(p){ return p.lat+','+p.lon; }).join(':');
     var url = 'https://api.tomtom.com/routing/1/calculateRoute/' + locStr + '/json'
       + '?key=' + encodeURIComponent(getKey())
       + '&routeType=' + routeTypeFor(metric)
-      + '&traffic=true&travelMode=car&sectionType=traffic';
+      + '&traffic=true&travelMode=car&sectionType=traffic'
+      + avoidParam(avoidTolls);
     return fetch(url).then(function(r){
       if(!r.ok) throw new Error('TomTom: HTTP ' + r.status);
       return r.json();
@@ -76,9 +82,9 @@ RP.routing = (function(){
     });
   }
 
-  function computeRoute(pts, onFallback, metric){
+  function computeRoute(pts, onFallback, metric, avoidTolls){
     if(hasKey()){
-      return tomtomRoute(pts, metric).catch(function(err){
+      return tomtomRoute(pts, metric, avoidTolls).catch(function(err){
         console.error(err);
         if(onFallback) onFallback(err);
         return osrmRoute(pts);
@@ -101,7 +107,7 @@ RP.routing = (function(){
 
   /* Real road distance + duration matrix (TomTom Matrix Routing v2). Falls back
      to straight-line so ordering still works without a key or when quota is hit. */
-  function roadMatrix(pts, metric){
+  function roadMatrix(pts, metric, avoidTolls){
     if(!hasKey() || pts.length < 2 || pts.length > 25){
       return Promise.resolve(fallbackMatrix(pts));
     }
@@ -110,7 +116,8 @@ RP.routing = (function(){
       destinations: pts.map(function(p){ return { point: { latitude: p.lat, longitude: p.lon } }; })
     };
     var url = 'https://api.tomtom.com/routing/matrix/2?key=' + encodeURIComponent(getKey())
-      + '&routeType=' + routeTypeFor(metric) + '&traffic=true&travelMode=car';
+      + '&routeType=' + routeTypeFor(metric) + '&traffic=true&travelMode=car'
+      + avoidParam(avoidTolls);
     return fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -148,6 +155,9 @@ RP.routing = (function(){
 
   return {
     hasKey: hasKey,
+    /* True when the toll setting can actually be applied: without a key every
+       route comes from OSRM, which cannot avoid anything. */
+    canAvoidTolls: hasKey,
     osrmRoute: osrmRoute,
     tomtomRoute: tomtomRoute,
     computeRoute: computeRoute,

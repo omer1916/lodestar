@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.svg?v=1" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/style.css?v=51">
+<link rel="stylesheet" href="css/style.css?v=52">
 </head>
 <body class="plain drv">
 
@@ -100,17 +100,17 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="js/icons.js?v=51"></script>
-<script src="js/firebase-config.js?v=51"></script>
-<script src="js/storage.js?v=51"></script>
-<script src="js/auth.js?v=51"></script>
-<script src="js/auth-ui.js?v=51"></script>
-<script src="js/geo.js?v=51"></script>
-<script src="js/routing.js?v=51"></script>
-<script src="js/reroute.js?v=51"></script>
-<script src="js/upload.js?v=51"></script>
-<script src="js/delivery.js?v=51"></script>
-<script src="js/pdf.js?v=51"></script>
+<script src="js/icons.js?v=52"></script>
+<script src="js/firebase-config.js?v=52"></script>
+<script src="js/storage.js?v=52"></script>
+<script src="js/auth.js?v=52"></script>
+<script src="js/auth-ui.js?v=52"></script>
+<script src="js/geo.js?v=52"></script>
+<script src="js/routing.js?v=52"></script>
+<script src="js/reroute.js?v=52"></script>
+<script src="js/upload.js?v=52"></script>
+<script src="js/delivery.js?v=52"></script>
+<script src="js/pdf.js?v=52"></script>
 <script>
 (function(){
 "use strict";
@@ -258,6 +258,7 @@ function openRoute(id){
   RP.storage.loadRoute(id).then(function(r){
     route = r;
     // the plan already knows where the jams are; that drives the re-route trigger
+    RP.reroute.setAvoidTolls(!!(r.options && r.options.avoidTolls));
     RP.reroute.setJams((r.vehicles || []).reduce(function(acc, v){
       return acc.concat(v.trafficSections || []);
     }, []));

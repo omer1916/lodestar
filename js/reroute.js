@@ -131,6 +131,11 @@ RP.reroute = (function(){
 
   /* ---------- known jams from the planned route ---------- */
 
+  /* Carried over from the plan: suggesting a toll motorway to a driver whose
+     route was deliberately built without one would be worse than not suggesting. */
+  var avoidTolls = false;
+  function setAvoidTolls(v){ avoidTolls = !!v; }
+
   /* `list` comes from the saved route: {lat, lon, magnitude, delay, speed}. */
   function setJams(list){
     jams = (list || []).filter(function(j){
@@ -215,7 +220,7 @@ RP.reroute = (function(){
 
     return RP.routing.computeRoute(
       [{ lat: pos.lat, lon: pos.lon }, { lat: nextStop.lat, lon: nextStop.lon }],
-      null, 'duration'
+      null, 'duration', avoidTolls
     ).then(function(route){
       if(!route || !route.traffic) return null;     // OSRM fallback carries no traffic
 
@@ -269,6 +274,7 @@ RP.reroute = (function(){
     CFG: CFG,
     pushPosition: pushPosition,
     setJams: setJams,
+    setAvoidTolls: setAvoidTolls,
     decide: decide,
     scan: scan,
     dismiss: dismiss,
