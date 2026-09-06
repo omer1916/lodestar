@@ -241,6 +241,15 @@ lodestar/
 
 ---
 
+## Ekip ve görev paylaşımı
+
+| | |
+|---|---|
+| **Ömer Daştan** | Rota optimizasyonu (nearest-neighbor, 2-opt, tavlama benzetimi, sweep), TomTom ve OSRM entegrasyonu, canlı trafik ve yeniden rotalama, Firebase Auth + Firestore katmanı, güvenlik kuralları ve saldırı senaryoları |
+| **Yağmur** | Arayüz tasarımı ve açık/koyu tema sistemi, mobil ve yatay ekran yerleşimi, SVG ikon seti; CSV ve fotoğraftan (OCR) içe aktarma, barkod okuma, yazdırılabilir teslimat listesi; cihaz testleri ve saha denemeleri |
+
+---
+
 ## Lisans
 
 MIT
