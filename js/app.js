@@ -770,7 +770,30 @@ function isDriver(){
 (function(){
   var modeGate = document.getElementById('modeGate');
   var seg = document.getElementById('modeSeg');
+  var usageHint = document.getElementById('usageHint');
   if(!modeGate || !seg) return;
+
+  /* Writing the answer onto the account settles it everywhere, not just in this
+     browser's localStorage. Best effort: a failure here changes nothing visible. */
+  function settle(mode){
+    var prof = RP.auth.available() ? RP.auth.profile() : null;
+    if(prof && prof.usage !== mode && RP.auth.updateProfile){
+      RP.auth.updateProfile({ usage: mode }).catch(function(){});
+    }
+  }
+
+  function dismissHint(){
+    if(usageHint) usageHint.hidden = true;
+    try { localStorage.setItem('rp_usage_hint', 'seen'); } catch(e){}
+  }
+
+  function explainInferredMode(role){
+    if(!usageHint) return;
+    try { if(localStorage.getItem('rp_usage_hint') === 'seen') return; } catch(e){}
+    var el = usageHint.querySelector('#usageHintRole');
+    if(el) el.textContent = role === 'driver' ? 'şoför' : 'planlayıcı';
+    usageHint.hidden = false;
+  }
 
   modeGate.querySelector('.logo').innerHTML = RP.icons.svg('star');
 
@@ -790,7 +813,24 @@ function isDriver(){
     // accounts registered after the usage step already carry the answer, so the
     // dialog is only for older accounts and anyone who never chose
     var prof = RP.auth.available() ? RP.auth.profile() : null;
-    if(prof && prof.usage && RP.mode.get() === null) RP.mode.set(prof.usage);
+
+    // answered at registration: nothing to ask, nothing to explain
+    if(prof && prof.usage){
+      if(RP.mode.get() === null) RP.mode.set(prof.usage);
+      modeGate.hidden = true;
+      return;
+    }
+
+    /* Registered before the usage question existed. The account still says whether
+       it was opened as a planner or a driver, and that only happened in the
+       business flow — so infer the mode and say why, instead of asking again. */
+    if(prof && prof.role && RP.mode.get() === null){
+      RP.mode.set('work');
+      explainInferredMode(prof.role);
+      modeGate.hidden = true;
+      return;
+    }
+
     modeGate.hidden = RP.mode.get() !== null;
     if(!modeGate.hidden) map.invalidateSize();
   }
@@ -798,14 +838,27 @@ function isDriver(){
   modeGate.querySelectorAll('.modepick button').forEach(function(b){
     b.addEventListener('click', function(){
       RP.mode.set(b.dataset.mode);
+      settle(b.dataset.mode);
       modeGate.hidden = true;
       map.invalidateSize();
     });
   });
 
   seg.querySelectorAll('button').forEach(function(b){
-    b.addEventListener('click', function(){ RP.mode.set(b.dataset.mode); });
+    b.addEventListener('click', function(){
+      RP.mode.set(b.dataset.mode);
+      settle(b.dataset.mode);   // an explicit choice answers the question for good
+      dismissHint();
+    });
   });
+
+  if(usageHint){
+    var ok = document.getElementById('usageHintOk');
+    if(ok) ok.addEventListener('click', function(){
+      dismissHint();
+      settle(RP.mode.isPersonal() ? 'personal' : 'work');
+    });
+  }
 
   RP.mode.onChange(function(){ syncSeg(); refreshStopDetailTitles(); });
   syncSeg();

@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="icon" href="favicon.svg?v=1" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/style.css?v=48">
+<link rel="stylesheet" href="css/style.css?v=49">
 </head>
 <body>
 
@@ -72,6 +72,16 @@
         <p class="hint" style="margin:6px 0 10px">Sana atanan rotalar şoför ekranında listelenir.
           Buradan da rota planlayabilirsin, ama teslimat işaretleme ve navigasyon orada.</p>
         <a class="btn primary" href="driver.html">Rotalarım</a>
+      </div>
+
+      <!-- An account from before the usage question still says how it was
+           registered. Asking again would ignore what the person already told us. -->
+      <div class="card usagehint" id="usageHint" hidden>
+        <b>Hesabın <span id="usageHintRole">planlayıcı</span> olarak kayıtlı.</b>
+        <p class="hint" style="margin:6px 0 10px">Bu yüzden iş modundasın: çoklu araç,
+          kapasite, vardiya ve teslimat alanları açık. Sadece kendi rotanı planlıyorsan
+          aşağıdaki <b>Kullanım</b> satırından Kişisel'e geçebilirsin.</p>
+        <button class="btn ghost" id="usageHintOk">Anladım</button>
       </div>
 
       <div class="sec">
@@ -221,21 +231,21 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="js/icons.js?v=48"></script>
-<script src="js/upload.js?v=48"></script>
-<script src="js/mode.js?v=48"></script>
-<script src="js/geo.js?v=48"></script>
-<script src="js/optimize.js?v=48"></script>
-<script src="js/routing.js?v=48"></script>
-<script src="js/firebase-config.js?v=48"></script>
-<script src="js/storage.js?v=48"></script>
-<script src="js/auth.js?v=48"></script>
-<script src="js/auth-ui.js?v=48"></script>
-<script src="js/delivery.js?v=48"></script>
-<script src="js/importers.js?v=48"></script>
-<script src="js/ocr.js?v=48"></script>
-<script src="js/scanner.js?v=48"></script>
-<script src="js/pdf.js?v=48"></script>
-<script src="js/app.js?v=48"></script>
+<script src="js/icons.js?v=49"></script>
+<script src="js/upload.js?v=49"></script>
+<script src="js/mode.js?v=49"></script>
+<script src="js/geo.js?v=49"></script>
+<script src="js/optimize.js?v=49"></script>
+<script src="js/routing.js?v=49"></script>
+<script src="js/firebase-config.js?v=49"></script>
+<script src="js/storage.js?v=49"></script>
+<script src="js/auth.js?v=49"></script>
+<script src="js/auth-ui.js?v=49"></script>
+<script src="js/delivery.js?v=49"></script>
+<script src="js/importers.js?v=49"></script>
+<script src="js/ocr.js?v=49"></script>
+<script src="js/scanner.js?v=49"></script>
+<script src="js/pdf.js?v=49"></script>
+<script src="js/app.js?v=49"></script>
 </body>
 </html>

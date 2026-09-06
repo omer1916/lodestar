@@ -633,3 +633,7 @@ html:not([data-theme="light"]) .docwarn{color:#fcd34d}
 /* driver landing on the planner: their own screen is one tap away */
 .card.drvhint{border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.08)}
 .card.drvhint .btn{width:auto;padding:9px 18px;display:inline-block}
+
+/* informational, not a call to action: calmer than the driver card */
+.card.usagehint{border-color:rgba(148,163,184,.45)}
+.card.usagehint .btn{width:auto;padding:8px 16px}
