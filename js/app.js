@@ -1600,7 +1600,7 @@ function saveAndShare(){
       '</div><button class="ico" id="assignBtn" title="Ata">' + RP.icons.svg('send') + '</button></div>' +
       '<p class="hint">Atanan şoför kendi hesabıyla girdiğinde bu rotayı "Rotalarım" altında görür.</p>' +
       '</div>' +
-      '<div id="progressBox"></div>';
+      '<div id="progressBox" class="work-only"></div>';
 
     document.getElementById('assignBtn').addEventListener('click', function(){
       var email = document.getElementById('assignEmail').value.trim();
