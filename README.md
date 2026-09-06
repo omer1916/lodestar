@@ -10,6 +10,11 @@ Uygulama açılışta hangisi olduğunu sorar ve ekranı ona göre sadeleştirir
 
 **Canlı demo: https://omer1916.github.io/lodestar/**
 
+![Lodestar planlama ekranı](docs/ekran-planlama.jpg)
+
+*İstanbul çıkışlı beş şehirlik tur. Girilen sırayla 1.131 km fazla yol yapılacaktı;
+optimize edilmiş sıra %43 daha kısa.*
+
 ---
 
 ## Ne işe yarar
@@ -58,6 +63,10 @@ planlayan biri için anlamı yok. Ekran buna göre kurulur:
 | Müşteri telefonu ve WhatsApp ETA mesajı | var | **yok** |
 | CSV ve barkod ile toplu durak girişi | var | **yok** |
 | Şoföre atama, teslimat takibi, teslimat kanıtı | var | **yok** |
+
+| İş modu | Kişisel mod |
+|---|---|
+| ![İş modu](docs/ekran-is-modu.png) | ![Kişisel mod](docs/ekran-kisisel-mod.png) |
 
 Zaman aralığı kişisel modda da duruyor: gezen sürücünün de "müze 17:00'de kapanıyor"
 demeye ihtiyacı var.
@@ -119,6 +128,9 @@ Yedek tetikleyici anlık hıza değil **5 dakikada kat edilen yola** bakar — b
 - Rotalar hesaba bağlı saklanır — telefondan da bilgisayardan da aynı liste
 
 ### Şoför ekranı
+
+![Şoför ekranı](docs/ekran-sofor.png)
+
 - Kendisine atanan rotalar listesi
 - Sıralı durak listesi, sıradaki durak vurgusu, ETA
 - Tek dokunuşla **Google Maps / Yandex Navigasyon**, müşteriye **WhatsApp** ETA mesajı
