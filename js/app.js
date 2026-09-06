@@ -897,6 +897,8 @@ document.getElementById('csvBtn').addEventListener('click', function(){
 document.getElementById('csvFile').addEventListener('change', function(e){
   var file = e.target.files && e.target.files[0];
   if(!file) return;
+  var problem = RP.upload.check(file, 'text');
+  if(problem){ toast(problem, true); e.target.value = ''; return; }
   var reader = new FileReader();
   reader.onload = function(){
     var rows = RP.importers.parse(reader.result);
@@ -916,6 +918,8 @@ document.getElementById('photoBtn').addEventListener('click', function(){
 document.getElementById('photoFile').addEventListener('change', function(e){
   var file = e.target.files && e.target.files[0];
   if(!file) return;
+  var problem = RP.upload.check(file, 'image');
+  if(problem){ toast(problem, true); e.target.value = ''; return; }
   var box = document.getElementById('importPreview');
   box.innerHTML = '<div class="card"><span class="spin"></span>Fotoğraf okunuyor… <span id="ocrPct">0%</span></div>';
   RP.ocr.recognize(file, function(pct){

@@ -12,13 +12,18 @@ RP.delivery = (function(){
      inline avoids requiring Firebase Storage on top of Firestore. */
   function compressPhoto(file){
     return new Promise(function(resolve, reject){
-      if(!file) return reject(new Error('Dosya yok'));
-      if(!/^image\//.test(file.type)) return reject(new Error('Bu bir görsel değil'));
+      var problem = RP.upload.check(file, 'image');
+      if(problem) return reject(new Error(problem));
 
       var url = URL.createObjectURL(file);
       var img = new Image();
       img.onload = function(){
         try {
+          // the file can be small while the bitmap behind it is enormous
+          if(RP.upload.tooManyPixels(img.width, img.height)){
+            URL.revokeObjectURL(url);
+            return reject(new Error('Görselin çözünürlüğü çok yüksek, daha küçük bir fotoğraf seç'));
+          }
           var scale = Math.min(1, MAX_EDGE / Math.max(img.width, img.height));
           var w = Math.max(1, Math.round(img.width * scale));
           var h = Math.max(1, Math.round(img.height * scale));

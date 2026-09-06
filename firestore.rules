@@ -28,11 +28,38 @@ service cloud.firestore {
 
     // Kullanıcı profili: yalnızca sahibi okur ve yazar.
     match /users/{uid} {
-      allow read, write: if signedIn() && request.auth.uid == uid;
+
+      /* Sahibi olmak sınırsız yazma hakkı vermez. Alan listesi ve uzunluklar
+         sabit: ad ekranda gösterildiği için devasa bir ad arayüzü bozar, alan
+         listesi de dokümanın rastgele veri deposuna dönüşmesini engeller. */
+      function validProfile() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['name', 'email', 'role', 'company', 'photoURL', 'createdAt', 'usage'])
+          && d.name is string && d.name.size() > 0 && d.name.size() <= 80
+          && d.get('email', '') is string && d.get('email', '').size() <= 200
+          && d.role in ['planner', 'driver']
+          && d.get('company', '') is string && d.get('company', '').size() <= 120
+          && d.get('photoURL', '') is string && d.get('photoURL', '').size() <= 500
+          && (d.get('usage', null) == null || d.usage in ['work', 'personal']);
+      }
+
+      allow read: if signedIn() && request.auth.uid == uid;
+      // silmede request.resource yoktur, bu yüzden doğrulama yalnızca yazmada
+      allow create, update: if signedIn() && request.auth.uid == uid && validProfile();
+      allow delete: if signedIn() && request.auth.uid == uid;
 
       // Adres defteri kullanıcının kendi alt koleksiyonu.
       match /places/{placeId} {
-        allow read, write: if signedIn() && request.auth.uid == uid;
+        function validPlace() {
+          let d = request.resource.data;
+          return d.keys().hasOnly(['label', 'lat', 'lon', 'savedAt'])
+            && d.label is string && d.label.size() > 0 && d.label.size() <= 300
+            && d.lat is number && d.lat >= -90 && d.lat <= 90
+            && d.lon is number && d.lon >= -180 && d.lon <= 180;
+        }
+
+        allow read, delete: if signedIn() && request.auth.uid == uid;
+        allow create, update: if signedIn() && request.auth.uid == uid && validPlace();
       }
     }
 
