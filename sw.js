@@ -27,7 +27,8 @@ var SHELL = [
   'js/pdf.js',
   'js/app.js',
   'manifest.json',
-  'favicon.svg'
+  'favicon.svg',
+  'favicon.ico'
 ];
 
 self.addEventListener('install', function(e){
