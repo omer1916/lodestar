@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="icon" href="favicon.svg?v=1" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/style.css?v=49">
+<link rel="stylesheet" href="css/style.css?v=50">
 </head>
 <body>
 
@@ -197,15 +197,20 @@
           <p class="hint">Key girilirse rota <b>canlı trafiğe</b> ve gerçek yol mesafesine göre hesaplanır. Boşsa ücretsiz OSRM kullanılır.
             <a href="https://developer.tomtom.com/user/register" target="_blank" rel="noopener">Ücretsiz key al →</a></p>
 
-          <label class="lbl" style="margin-top:14px">Firebase Config <span id="fbStatus" class="pill off">pasif</span></label>
-          <textarea class="inp" id="fbCfgInp" rows="4" placeholder='{"apiKey":"...","projectId":"...", ...}' style="resize:vertical;font-size:12px"></textarea>
-          <div class="btnrow" style="margin-top:8px">
-            <button class="btn ghost" id="fbSaveBtn">Kaydet</button>
-            <button class="btn ghost" id="fbClearBtn">Temizle</button>
+          <!-- Only a self-hosted copy without js/firebase-config.js needs this. On the
+               published site it is noise at best: pasting another project's config
+               here silently detaches the visitor from their own account. -->
+          <div id="fbCfgBlock" hidden>
+            <label class="lbl" style="margin-top:14px">Firebase Config <span id="fbStatus" class="pill off">pasif</span></label>
+            <textarea class="inp" id="fbCfgInp" rows="4" placeholder='{"apiKey":"...","projectId":"...", ...}' style="resize:vertical;font-size:12px"></textarea>
+            <div class="btnrow" style="margin-top:8px">
+              <button class="btn ghost" id="fbSaveBtn">Kaydet</button>
+              <button class="btn ghost" id="fbClearBtn">Temizle</button>
+            </div>
+            <p class="hint">Rota kaydetme, paylaşılabilir link ve canlı şoför takibi için gerekli. Firebase konsolundaki web app config'ini yapıştır.
+              <a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase konsolu →</a></p>
           </div>
-          <p class="hint">Rota kaydetme, paylaşılabilir link ve canlı şoför takibi için gerekli. Firebase konsolundaki web app config'ini yapıştır.
-            <a href="https://console.firebase.google.com/" target="_blank" rel="noopener">Firebase konsolu →</a></p>
-          <p class="hint">Anahtarlar yalnızca bu tarayıcıda saklanır, sunucuya gönderilmez. <a href="kurulum.html">Trafik anahtarı nasıl alınır?</a></p>
+          <p class="hint">Anahtar yalnızca bu tarayıcıda saklanır, sunucuya gönderilmez. <a href="kurulum.html">Trafik anahtarı nasıl alınır?</a></p>
 
           <label class="lbl" style="margin-top:14px">Yakıt ve maliyet</label>
           <div class="opt">
@@ -231,21 +236,21 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="js/icons.js?v=49"></script>
-<script src="js/upload.js?v=49"></script>
-<script src="js/mode.js?v=49"></script>
-<script src="js/geo.js?v=49"></script>
-<script src="js/optimize.js?v=49"></script>
-<script src="js/routing.js?v=49"></script>
-<script src="js/firebase-config.js?v=49"></script>
-<script src="js/storage.js?v=49"></script>
-<script src="js/auth.js?v=49"></script>
-<script src="js/auth-ui.js?v=49"></script>
-<script src="js/delivery.js?v=49"></script>
-<script src="js/importers.js?v=49"></script>
-<script src="js/ocr.js?v=49"></script>
-<script src="js/scanner.js?v=49"></script>
-<script src="js/pdf.js?v=49"></script>
-<script src="js/app.js?v=49"></script>
+<script src="js/icons.js?v=50"></script>
+<script src="js/upload.js?v=50"></script>
+<script src="js/mode.js?v=50"></script>
+<script src="js/geo.js?v=50"></script>
+<script src="js/optimize.js?v=50"></script>
+<script src="js/routing.js?v=50"></script>
+<script src="js/firebase-config.js?v=50"></script>
+<script src="js/storage.js?v=50"></script>
+<script src="js/auth.js?v=50"></script>
+<script src="js/auth-ui.js?v=50"></script>
+<script src="js/delivery.js?v=50"></script>
+<script src="js/importers.js?v=50"></script>
+<script src="js/ocr.js?v=50"></script>
+<script src="js/scanner.js?v=50"></script>
+<script src="js/pdf.js?v=50"></script>
+<script src="js/app.js?v=50"></script>
 </body>
 </html>

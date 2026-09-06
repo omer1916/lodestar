@@ -493,6 +493,10 @@ document.getElementById('ttSaveBtn').addEventListener('click', function(){
   updateTtStatus();
 });
 
+/* The published site carries its own Firebase project, so the config box is only
+   shown to someone running a copy that has none. */
+var fbCfgBlock = document.getElementById('fbCfgBlock');
+if(fbCfgBlock) fbCfgBlock.hidden = !!RP.firebaseConfig;
 var fbCfgInp = document.getElementById('fbCfgInp');
 var fbStatus = document.getElementById('fbStatus');
 var histPill = document.getElementById('histPill');
