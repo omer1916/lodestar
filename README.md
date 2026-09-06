@@ -243,10 +243,11 @@ lodestar/
 
 ## Ekip ve görev paylaşımı
 
-| | |
-|---|---|
-| **Ömer Daştan** | Rota optimizasyonu (nearest-neighbor, 2-opt, tavlama benzetimi, sweep), TomTom ve OSRM entegrasyonu, canlı trafik ve yeniden rotalama, Firebase Auth + Firestore katmanı, güvenlik kuralları ve saldırı senaryoları |
-| **Yağmur** | Arayüz tasarımı ve açık/koyu tema sistemi, mobil ve yatay ekran yerleşimi, SVG ikon seti; CSV ve fotoğraftan (OCR) içe aktarma, barkod okuma, yazdırılabilir teslimat listesi; cihaz testleri ve saha denemeleri |
+| | Ömer Daştan | Yağmur |
+|---|---|---|
+| **Yazılım** | Optimizasyon algoritmaları (nearest-neighbor, 2-opt, tavlama benzetimi, sweep), TomTom ve OSRM rota/matris entegrasyonu, canlı yeniden rotalama, Firebase Auth ve Firestore katmanı | CSV ve fotoğraftan (OCR) içe aktarma, barkod okuma, yazdırılabilir teslimat listesi, adres defteri, PWA ve service worker |
+| **Tasarım** | Sonuç kartı ve rozet sistemi (tasarruf, trafik, yakıt), harita katmanları ve durak işaretleri, iş/kişisel mod ekran ayrımı | Renk paleti ve açık/koyu tema, kapak sayfası düzeni, mobil ve yatay ekran yerleşimi, SVG ikon seti |
+| **Test** | Güvenlik kuralları için 14 saldırı senaryosu, algoritma ölçümleri (tavlama kazanımı, kapasite dağıtımı), şehirler arası ölçek testi | Cihaz ve tarayıcı testleri, OCR/CSV içe aktarma denemeleri, şoför akışının saha denemesi |
 
 ---
 
