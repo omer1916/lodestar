@@ -244,7 +244,7 @@ lodestar/
 
 ## Ekip ve görev paylaşımı
 
-| | Ömer Daştan | Yağmur |
+| | Ömer Daştan | Yağmur Kağan |
 |---|---|---|
 | **Yazılım** | Optimizasyon algoritmaları (nearest-neighbor, 2-opt, tavlama benzetimi, sweep), TomTom ve OSRM rota/matris entegrasyonu, canlı yeniden rotalama, Firebase Auth ve Firestore katmanı | CSV ve fotoğraftan (OCR) içe aktarma, barkod okuma, yazdırılabilir teslimat listesi, adres defteri, PWA ve service worker |
 | **Tasarım** | Sonuç kartı ve rozet sistemi (tasarruf, trafik, yakıt), harita katmanları ve durak işaretleri, iş/kişisel mod ekran ayrımı | Renk paleti ve açık/koyu tema, kapak sayfası düzeni, mobil ve yatay ekran yerleşimi, SVG ikon seti |
